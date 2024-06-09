@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
         matchBrackets: true,
         theme: "moxer",
         mode: "text/x-rustsrc",
-        value: "3+3"
+        value: ""
         });
 
 
