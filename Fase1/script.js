@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let end = performance.now();
             msj.textContent = "successfully. Time: " +( end - start);
             msj.style.backgroundColor = "#a6ffa6";
-            result.setValue(resultado.toString());
+            result.setValue("Codigo correctamente compilado!\n\n"+resultado.toString());
         } catch (error) {
             result.setValue(error.message);
             msj.textContent = "Unsuccessfully.";
