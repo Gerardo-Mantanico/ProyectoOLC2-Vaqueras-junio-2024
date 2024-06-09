@@ -70,10 +70,11 @@ const cleanEditor = (editor) => {
 const analysis = async () => {
     const text = Arm64Editor.getValue();
     try {
-        let resultado = FASE1.parse(text);
-        consoleResult.setValue(resultado.toString());
+        let resultado = PEGFASE1.parse(text);
+        consoleResult.setValue("El codigo esta sintacticamente correcto!");
+        //consoleResult.setValue(resultado.toString());
     } catch (error) {
-        consoleResult.setValue(error.message);
+        consoleResult.setValue("Hay error en el codigo!\n"+error.message);
     }
 }
 
