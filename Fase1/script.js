@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const editorContainer = document.getElementById("editorContainer");
     const ConsoleResul = document.getElementById("ConsoleResul");
     const windowList = document.getElementById("windowList");
-    let editors = [],codigo = [],result, currentEditorIndex = -1, indice=0;
+    let editors = [], codigo = [], result, currentEditorIndex = -1, indice = 0;
 
 
     // Función para agregar una nueva ventana de edición
@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
         editorContainer.appendChild(newEditor);
 
         // Inicializa CodeMirror en la nueva ventana
-       var editor = CodeMirror(newEditor, {
-        lineNumbers: true,
-        styleActivateLine: true,
-        matchBrackets: true,
-        theme: "moxer",
-        mode: "text/x-rustsrc",
-        value: ""
+        var editor = CodeMirror(newEditor, {
+            lineNumbers: true,
+            styleActivateLine: true,
+            matchBrackets: true,
+            theme: "moxer",
+            mode: "text/x-rustsrc",
+            value: ""
         });
 
 
@@ -55,9 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
-
-
     // Función para agregar una nueva ventana de edición
     function resultConsola() {
         consola.log("wenas");
@@ -72,11 +69,9 @@ document.addEventListener("DOMContentLoaded", function () {
             lineNumbers: true,
             styleActivateLine: true,
             matchBrackets: true,
-            // theme: 'moxer',
+            theme: 'moxer',
             mode: "javascript",
-            value: "    //Bienvenido al IDE con CodeMirror"
         });
-
 
 
         // Oculta todas las ventanas excepto la última
@@ -112,9 +107,6 @@ document.addEventListener("DOMContentLoaded", function () {
             listItem.appendChild(closeButton);
             listItem.appendChild(btnAddWindow);
             windowList.appendChild(listItem);
-
-
-        
         }
 
     }
@@ -135,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             editors[index].style.display = "block";
             currentEditorIndex = index;
-            indice=index;
+            indice = index;
         }
     }
 
@@ -162,12 +154,13 @@ document.addEventListener("DOMContentLoaded", function () {
         codigo[index].setValue("");
     }
 
-
-
     const openFile = async (index) => {
         const { value: file } = await Swal.fire({
             title: 'Select File',
             input: 'file',
+            inputAttributes: {
+                accept: '.s' // Limita la selección de archivos a .s
+            }
         })
         if (!file) return
 
@@ -184,7 +177,6 @@ document.addEventListener("DOMContentLoaded", function () {
         reader.readAsText(file)
 
     }
-
 
     const saveFile = async (fileName, extension, index) => {
         if (!fileName) {
@@ -203,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (fileName) {
             const primerEditor = codigo[index];
-        const text = primerEditor.getValue();
+            const text = primerEditor.getValue();
             download(`${fileName}.${extension}`, text)
         }
     }
@@ -218,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     const analysis = async (index) => {
-        console.log("index "+index);
+        console.log("index " + index);
         const primerEditor = codigo[index];
         const text = primerEditor.getValue();
         var msj = document.getElementById("msj");
@@ -226,9 +218,9 @@ document.addEventListener("DOMContentLoaded", function () {
             let start = performance.now();
             let resultado = PEGFASE1.parse(text);
             let end = performance.now();
-            msj.textContent = "successfully. Time: " +( end - start);
+            msj.textContent = "successfully. Time: " + (end - start);
             msj.style.backgroundColor = "#a6ffa6";
-            result.setValue("Codigo correctamente compilado!\n\n"+resultado.toString());
+            result.setValue("Codigo correctamente compilado!\n\n" + resultado.toString());
         } catch (error) {
             result.setValue(error.message);
             msj.textContent = "Unsuccessfully.";
@@ -245,16 +237,16 @@ document.addEventListener("DOMContentLoaded", function () {
     btnAddWindow.addEventListener("click", addEditorWindow);
     editorContainer.appendChild(btnAddWindow);
     const btnOpen = document.getElementById('btn__open'),
-    btnSave = document.getElementById('btn__save'),
-    btnClean = document.getElementById('btn__clean'),
-    btnShowCst = document.getElementById('btn__showCST'),
-    btnAnalysis = document.getElementById('btn__analysis');
+        btnSave = document.getElementById('btn__save'),
+        btnClean = document.getElementById('btn__clean'),
+        btnShowCst = document.getElementById('btn__showCST'),
+        btnAnalysis = document.getElementById('btn__analysis');
 
-btnOpen.addEventListener('click', () => openFile(indice));
-btnSave.addEventListener('click', () => saveFile("file", "rs", indice));
-btnClean.addEventListener('click', () => cleanEditor(indice));
-//btnShowCst.addEventListener('click', () => localStorage.setItem("dot", dotStringCst));
-btnAnalysis.addEventListener('click', () => analysis(indice));
+    btnOpen.addEventListener('click', () => openFile(indice));
+    btnSave.addEventListener('click', () => saveFile("file", "rs", indice));
+    btnClean.addEventListener('click', () => cleanEditor(indice));
+    //btnShowCst.addEventListener('click', () => localStorage.setItem("dot", dotStringCst));
+    btnAnalysis.addEventListener('click', () => analysis(indice));
 
 
     // Agrega una ventana de edición por defecto al cargar la página
