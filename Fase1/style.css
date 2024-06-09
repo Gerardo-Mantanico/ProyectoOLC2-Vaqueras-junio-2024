@@ -2,16 +2,17 @@
 :root{
     --primary-color     : #0F111A;
     --secondary-color   : #00010A;
-    --accent-color      : #efefdd;
+    --accent-color      : #FF4151;
     --color-0           : #3B4252;
     --color-1           : #BF616A;
     --foreground        : #e5e9f0;
-    --color-2           : #A3BE8C;
+    --color-2           : #873100;
     --color-3           : #EBCB8B;
     --color-4           : #81A1C1;
     --color-5           : #B48EAD;
     --color-6           : #88C0D0;
     --color-8           : #4C566A;
+    --color-9           : #2196f3;
 }
 * {
     padding: 0;
@@ -36,17 +37,17 @@ header{
 header h4 {
     color: #fff;
     text-shadow:
-      0 0 7px #fff,
-      0 0 10px #fff,
-      0 0 21px #fff,
-      0 0 42px blue,
-      0 0 82px  blue,
-      0 0 92px  blue,
-      0 0 102px  blue,
-      0 0 151px blue;
+      0 0 7px       #fff,
+      0 0 10px      #fff,
+      0 0 21px      #fff,
+      0 0 42px      var(--color-9),
+      0 0 82px      var(--color-9),
+      0 0 92px      var(--color-9),
+      0 0 102px     var(--color-9),
+      0 0 151px     var(--color-9);
   }
 .col {
-    margin-top: 2rem;
+    margin-top: 1rem;
 }
 nav {
     background-color: var(--primary-color);
@@ -59,7 +60,6 @@ nav {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-
     padding: 0.5rem 0.75rem;
 }
 
@@ -68,7 +68,7 @@ nav {
 }
 
 .nav__options li button{
-    background-color: var(--accent-color);
+    background-color: var(--color-9);
     display: flex;
     align-items: center;
 }
@@ -122,12 +122,9 @@ nav {
 
 .tab__panel{
     background-color: var(--primary-color);
-    padding: 1.5rem 2rem !important;
     min-height:39vh;
-    height: 87vh;
-    border-radius: 0 0 25px 25px;
+    height: 78vh;
     margin: 0;
-
     overflow-y: auto;
 }
 
@@ -187,10 +184,18 @@ a.paginate_button.current{
 *
 */
 
-.julia__editor {
-    height: 87vh;
-}
 
+
+.msj{
+    margin-top: 10px;
+    width: 50%;
+    height: 30px;
+    border-radius: 8px;
+    color: #00010A;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .CodeMirror {
     height: 100%;
     width: 100%;
@@ -198,6 +203,39 @@ a.paginate_button.current{
     padding: 0 0.75rem;
 }
 
+#windowList{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-bottom: 2px solid var(--color-0);
+}
+.btn-windows{
+    flex: 1 1 auto; /* Permite que los botones se redimensionen */
+    min-width: 10px;
+    background-color: var(--primary-color);
+    color: var(--foreground);
+    border: none;
+    font-size: 12px;
+}
+
+.btn-close{
+    margin-left: 5px;
+    background-color: var(--accent-color);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    color: var(--foreground);
+}
+.btn-add{
+    background-color: var(--color-9);
+    color: var(--foreground);
+    width: 20px;
+    border-radius: 3px;
+    border: none;
+    margin-left: 5px;
+    font-size: large;
+}
 
 #ast__visualization{
     width: 85%;
@@ -212,4 +250,22 @@ a.paginate_button.current{
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
+}
+
+
+.swal2-popup {
+    background-color: var(--primary-color) !important; /* Fondo personalizado */
+    color: #333333 !important; /* Color del texto personalizado */
+    border-radius: 8px; /* Borde personalizado */
+}
+.swal2-title {
+    color: var(--foreground) !important;
+    font-family: monospace;
+    font-size: large;
+     /* Color del título personalizado */
+}
+
+.swal2-confirm {
+    background-color:  var(--color-9) !important; /* Color de fondo del botón */
+    color: #ffffff !important; /* Color del texto del botón */
 }
