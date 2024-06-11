@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnAnalysis = document.getElementById('btn__analysis');
 
     btnOpen.addEventListener('click', () => openFile(indice));
-    btnSave.addEventListener('click', () => saveFile("file", "rs", indice));
+    btnSave.addEventListener('click', () => saveFile("file", "s", indice));
     btnClean.addEventListener('click', () => cleanEditor(indice));
     //btnShowCst.addEventListener('click', () => localStorage.setItem("dot", dotStringCst));
     btnAnalysis.addEventListener('click', () => analysis(indice));
