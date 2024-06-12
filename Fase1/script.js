@@ -218,9 +218,9 @@ document.addEventListener("DOMContentLoaded", function () {
             let start = performance.now();
             let resultado = PEGFASE1.parse(text);
             let end = performance.now();
-            msj.textContent = "successfully. Time: " + (end - start);
+            msj.textContent = "successfully. Time: " + (end - start) + "ms.";
             msj.style.backgroundColor = "#a6ffa6";
-            result.setValue("Codigo correctamente compilado!\n\n" + resultado.toString());
+            result.setValue("Codigo correctamente compilado!");
         } catch (error) {
             result.setValue(error.message);
             msj.textContent = "Unsuccessfully.";
