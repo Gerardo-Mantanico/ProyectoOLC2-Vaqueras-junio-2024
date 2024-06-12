@@ -5,15 +5,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let editors = [], codigo = [], result, currentEditorIndex = -1, indice = 0;
     // Obtén una referencia al cuerpo de la tabla
     var tableBody = $('#errorTable tbody');
-
-
+    const errors = [];
+    let cont=1;
 
     $(document).ready(function () {
         $('.tabs').tabs();
         $("select").formSelect();
         $('.tooltipped').tooltip();
-        editorContainer = editor('julia__editor', 'text/x-rustsrc');
-        consoleResult = editor('console__result', '', false, true, false);
     });
 
 
@@ -174,7 +172,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let reader = new FileReader();
         reader.onload = (e) => {
             const file = e.target.result;
-            console.log(file)
             codigo[index].setValue(file);
         }
         reader.onerror = (e) => {
@@ -215,68 +212,139 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* ----------------------------------------*/
 
-    function isLexicalError(error) {
+    function isLexicalError(found) {
         const validIdentifier = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
         const validInteger = /^[0-9]+$/;
-        var validRegister = /(x(0|1[0-9]|2[0-9]|30?)|w(0|1[0-9]|2[0-9]|30?)|LR)/i;
-        const validCharacter = /^[a-zA-Z0-9_$,\[\]#"]$/;
-        if (error.found) {
-          if (!validIdentifier.test(error.found) && 
-              !validInteger.test(error.found) &&
-              !validRegister.test(error.found) &&
-              !validCharacter.test(error.found)) {
-            return true; // Error léxico
-          }
+        const validCommentSingleLine = /^\/\/[^\n]*$/; // Comentarios de una sola línea
+        const validCommentMultiLine = /^\/\*[^*]*\*\/$/; // Comentarios de varias líneas
+        const palabraReserved = /^\.[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+        const et = /^[a-zA-Z_$][a-zA-Z0-9_$]*:$/;
+        const reg = /^[#]?([x|X|d|D|w|W]|[0-9]+)$/;
+        const symbols = /^[:;,]$/;
+    
+        if (found) {
+            if (!validIdentifier.test(found) && 
+                !validInteger.test(found) && 
+                !palabraReserved.test(found) && 
+                !symbols.test(found) &&
+                !validCommentSingleLine.test(found) && 
+                !validCommentMultiLine.test(found)&&
+                !et.test(found)&&
+                !reg.test(found)) {
+                return "Lexico"; // Error léxico
+            }
         }
-        return false; // Error sintáctico
+        return "Sintactico"; // Error sintáctico
     }
 
     const analysis = async (index) => {
+        cont=1;
         const primerEditor = codigo[index];
         const text = primerEditor.getValue();
         var msj = document.getElementById("msj");
         tableBody.empty();
         result.setValue("");
-        try {
-            let start = 0; 
-            start = performance.now();
-            let resultado = PEGFASE1.parse(text);
-            let end = performance.now();
-            msj.textContent = "successfully. Time: " + (end - start);
-            msj.style.backgroundColor = "#a6ffa6";
-            result.setValue("Codigo correctamente compilado!\n\n" + resultado.toString());
-        } catch (error) {
-            if (error instanceof PEGFASE1.SyntaxError) {
-              if (isLexicalError(error)) {
-                    result.setValue('Error Léxico: ' + error.message);
-                    table(error,"Lexico");
-              
-                } else {
-                    result.setValue('Error Sintáctico: ' + error.message);
-                    table(error,"Semantico");
-                }
-            } else {
-                result.error('Error desconocido:', error);
-            }
-            /*table(error,"Semantico");
-            result.setValue("tipo de error "+error.message);*/
+        let start = performance.now();
+        let resultado = PEGFASE1.parse(text);
+        let end = performance.now();
+        let err = extractErrors(resultado);
+    
+
+        if (err.length > 0) {
             msj.textContent = "Unsuccessfully.";
             msj.style.backgroundColor = "#ff8c8c";
+            let output="El codigo tiene errores \n";
+            for (let i = 0; i < err.length; i++) {
+                err[i].tipo = isLexicalError(err[i].found);
+                console.log(err[i].found);
+                
+                //llenado de tabla de errores
+                table(err[i].mensaje,err[i].linea, err[i].columna,err[i].tipo);
+            }
+            for (let i = 0; i < err.length; i++) {
+                output += `Tipo: ${err[i].tipo}, Mensaje: ${err[i].mensaje}, Línea: ${err[i].linea}, Columna: ${err[i].columna}\n`;
+            }
+            result.setValue(output);
+            
+        } else {
+            msj.textContent = "successfully. Time: " + (end - start) + " ms";
+            msj.style.backgroundColor = "#a6ffa6";
+            result.setValue("Codigo correctamente compilado!\n\n");
         }
     }
+
+    function extractErrors(inputArray) {
+        const errors = [];
+    
+        function processArray(array) {
+            for (const item of array) {
+                if (Array.isArray(item)) {
+                    processArray(item); // Recursively process nested arrays
+                } else if (item && typeof item === 'object' && item.type === 'error') {
+                    const errorObj = {
+                        tipo: item.type,
+                        mensaje: item.message,
+                        linea: item.location.start.line,
+                        columna: item.location.start.column,
+                        found: item.found // Assumes the location object has a 'found' property with the token
+                    };
+                    errors.push(errorObj); // Extract and store the error information
+                }
+            }
+        }
+        msj
+        processArray(inputArray);
+        return errors;
+    }
+
+    function extractErrorss(inputArray) {
+        function processArray(array) {
+            for (const item of array) {
+                if (Array.isArray(item)) {
+                    processArray(item); // Recursively process nested arrays
+                } else if (item && typeof item === 'object' && item.type === 'error') {
+                    
+                    const msj = `${item.message}`;
+                    const linea =  `${item.location.start.line}`;
+                    const columna=` ${item.location.start.column}`;
+                    table(msj,linea,columna,"Sintactico");
+               
+                }
+            }
+        }
+    
+        processArray(inputArray);
+        return errors;
+    }
+    
+    function runCode(resultado) {
+        
+        try {
+            let errors = extractErrors(resultado);
+            let output = "Errores encontrados:\n";  
+            for (let index = 0; index < errors.length; index++) {
+                output += errors[index] + "\n";
+            }
+            
+        } catch (error) {
+            console.error('Error al analizar el código:', error);
+           
+        }
+    }
+    
 
     function convertLocation(location) {
         return CodeMirror.Pos(location.line - 1, location.column - 1);
       }
 
-    function table(e,msj){
+    function table(msj,linea,columna,text){
         var newData = [
             {
-                "No.": 1,
-                "Description": e.message,
-                "Row":  e.location.start.line ,
-                "Column": e.location.start.column ,
-                "Type": msj
+                "No.": cont++,
+                "Description": msj,
+                "Row":  linea,
+                "Column": columna,
+                "Type": text
             }
         ];     
         // Itera sobre los nuevos datos y agrega cada uno como una nueva fila a la tabla
