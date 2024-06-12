@@ -18,6 +18,7 @@
     <!-- ============================= DATA TABLE ============================== -->
     <script type="text/javascript" charset="utf8"
         src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+
     <!-- Incluyendo SweetAlert2 desde un CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Scripts for Codemirror -->
@@ -32,11 +33,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css"
         integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+          <!-- Agrega Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqb0xdG6Qr8v12K6PJs5qhcz" crossorigin="anonymous">
 
     <!-- Theme moxer -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/moxer.min.css"
         integrity="sha512-zrCGHGmTpiZpzVJ6BdiDfsUT6t8+oOKmOtfU82GhBo/7sk/cns7phhKXSWmGH6uACPqgjP8QmgczNBY7HMB9TQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Theme dracula-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/theme/dracula.min.css">
     <link rel="stylesheet" href="Fase1/style.css">
     <title>Proyecto Fase 1</title>
 </head>
@@ -87,22 +92,38 @@
             <div id="windowList"> </div>
             <div id="" class="editorContainer">
                 <div id="editorContainer"></div>
-
             </div>
         </div>
         <div class="col s12 m12 l6">
             <ul class="tabs tabs-fixed-width  z-depth-5">
-                <li class="tab"><a class="active" href="#console-tab"> Console </a></li>
+                <li class="tab"><a href="#console-tab">    Console </a></li>
+                <li class="tab"><a href="#error__table"> Error Table </a></li>
             </ul>
-            <div id="ConsoleResul"></div>
+
+            <div id="console-tab" class="col s12 tab__panel">
+                <div id="ConsoleResul"></div>
+            </div>
+            <div id="error__table" class="col s12 tab__panel">
+                <table id="errorTable" style="width: 100%">
+                      <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Description</th>
+                            <th>Row</th>
+                            <th>Column</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
-
     <!-- ============================= PARSER ============================== -->
     <script src="Fase1/parser.js"></script>
     <!-- ============================= SCRIPT ============================== -->
     <script src="Fase1/script.js"></script>
-
 </body>
-
 </html>

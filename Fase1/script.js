@@ -3,6 +3,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const ConsoleResul = document.getElementById("ConsoleResul");
     const windowList = document.getElementById("windowList");
     let editors = [], codigo = [], result, currentEditorIndex = -1, indice = 0;
+    // Obtén una referencia al cuerpo de la tabla
+    var tableBody = $('#errorTable tbody');
+
+
+
+    $(document).ready(function () {
+        $('.tabs').tabs();
+        $("select").formSelect();
+        $('.tooltipped').tooltip();
+        editorContainer = editor('julia__editor', 'text/x-rustsrc');
+        consoleResult = editor('console__result', '', false, true, false);
+    });
 
 
     // Función para agregar una nueva ventana de edición
@@ -57,23 +69,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Función para agregar una nueva ventana de edición
     function resultConsola() {
-        consola.log("wenas");
         var newEditor = document.createElement("div");
         newEditor.className = "editor";
         newEditor.style.height = "70vh";
         editorContainer.appendChild(newEditor);
-
         // Inicializa CodeMirror en la nueva ventana
         var editor = CodeMirror(newEditor, {
             lineNumbers: true,
             lineNumbers: true,
             styleActivateLine: true,
             matchBrackets: true,
-            theme: 'moxer',
+            theme: 'dracula',
             mode: "javascript",
         });
-
-
+        
         // Oculta todas las ventanas excepto la última
         for (var i = 0; i < editors.length - 1; i++) {
             editors[i].style.display = "none";
@@ -86,7 +95,6 @@ document.addEventListener("DOMContentLoaded", function () {
         showEditorWindow(editors.length - 1);
         updateWindowList();
     }
-
 
 
     // Función para actualizar la lista de ventanas
@@ -163,9 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         })
         if (!file) return
-
         let reader = new FileReader();
-
         reader.onload = (e) => {
             const file = e.target.result;
             console.log(file)
@@ -175,7 +181,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Error to read file", e.target.error)
         }
         reader.readAsText(file)
-
     }
 
     const saveFile = async (fileName, extension, index) => {
@@ -208,26 +213,82 @@ document.addEventListener("DOMContentLoaded", function () {
         link.click()
     }
 
+    /* ----------------------------------------*/
+
+    function isLexicalError(error) {
+        const validIdentifier = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+        const validInteger = /^[0-9]+$/;
+        var validRegister = /(x(0|1[0-9]|2[0-9]|30?)|w(0|1[0-9]|2[0-9]|30?)|LR)/i;
+        const validCharacter = /^[a-zA-Z0-9_$,\[\]#"]$/;
+        if (error.found) {
+          if (!validIdentifier.test(error.found) && 
+              !validInteger.test(error.found) &&
+              !validRegister.test(error.found) &&
+              !validCharacter.test(error.found)) {
+            return true; // Error léxico
+          }
+        }
+        return false; // Error sintáctico
+    }
 
     const analysis = async (index) => {
-        console.log("index " + index);
         const primerEditor = codigo[index];
         const text = primerEditor.getValue();
         var msj = document.getElementById("msj");
+        tableBody.empty();
+        result.setValue("");
         try {
-            let start = performance.now();
+            let start = 0; 
+            start = performance.now();
             let resultado = PEGFASE1.parse(text);
             let end = performance.now();
-            msj.textContent = "successfully. Time: " + (end - start) + "ms.";
+            msj.textContent = "successfully. Time: " + (end - start);
             msj.style.backgroundColor = "#a6ffa6";
-            result.setValue("Codigo correctamente compilado!");
+            result.setValue("Codigo correctamente compilado!\n\n" + resultado.toString());
         } catch (error) {
-            result.setValue(error.message);
+            if (error instanceof PEGFASE1.SyntaxError) {
+              if (isLexicalError(error)) {
+                    result.setValue('Error Léxico: ' + error.message);
+                    table(error,"Lexico");
+              
+                } else {
+                    result.setValue('Error Sintáctico: ' + error.message);
+                    table(error,"Semantico");
+                }
+            } else {
+                result.error('Error desconocido:', error);
+            }
+            /*table(error,"Semantico");
+            result.setValue("tipo de error "+error.message);*/
             msj.textContent = "Unsuccessfully.";
             msj.style.backgroundColor = "#ff8c8c";
         }
     }
 
+    function convertLocation(location) {
+        return CodeMirror.Pos(location.line - 1, location.column - 1);
+      }
+
+    function table(e,msj){
+        var newData = [
+            {
+                "No.": 1,
+                "Description": e.message,
+                "Row":  e.location.start.line ,
+                "Column": e.location.start.column ,
+                "Type": msj
+            }
+        ];     
+        // Itera sobre los nuevos datos y agrega cada uno como una nueva fila a la tabla
+        newData.forEach(function(data) {
+            var row = $('<tr>');
+            Object.keys(data).forEach(function(key) {
+                row.append($('<td>').text(data[key]));
+            });
+            tableBody.append(row);
+        });
+    }
+  
     // Agrega una ventana de edición cuando se hace clic en el botón
     var btnAddWindow = document.createElement("button");
     btnAddWindow.className = "btn-add";
