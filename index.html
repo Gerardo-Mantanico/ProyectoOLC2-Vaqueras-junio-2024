@@ -43,6 +43,16 @@
     <!-- Theme dracula-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/theme/dracula.min.css">
     <link rel="stylesheet" href="Fase1/style.css">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+    <style type="text/css">
+        #mynetwork {
+            width: 100%;
+            height: 90vh;
+            border: none;
+        }
+    </style>
+
     <title>Proyecto Fase 1</title>
 </head>
 
@@ -121,9 +131,26 @@
             </div>
         </div>
     </div>
+    <div id="mynetwork"></div>
     <!-- ============================= PARSER ============================== -->
-    <script src="Fase1/parser.js"></script>
+    <script src="Fase2/parser/parser.js"></script>
     <!-- ============================= SCRIPT ============================== -->
-    <script src="Fase1/script.js"></script>
+    <script src="Fase2/script.js"></script>
+    <!-- ============================= CST ============================== -->
+    <script src="Fase2/interfaces/expression.js"></script>
+    <script src="Fase2/interfaces/instruction.js"></script>
+    <script src="Fase2/environment/ast.js"></script>
+    <script src="Fase2/environment/cst.js"></script>
+    <script src="Fase2/environment/environment.js"></script>
+    <script src="Fase2/generator/generator.js"></script>
+    <script src="Fase2/generator/quadruples.js"></script>
+    <script src="Fase2/execute/executer.js"></script>
+    <script src="Fase2/execute/root.js"></script>
+    <script src="Fase2/execute/textSection.js"></script>
+    <!-- ============================= EXPRESSIONS ============================== -->
+    <script src="Fase2/expressions/operation.js"></script>
+    <!-- ============================= EXPRESSIONS ============================== -->
+    <script src="Fase2/instructions/systemCall.js"></script>
+
 </body>
 </html>

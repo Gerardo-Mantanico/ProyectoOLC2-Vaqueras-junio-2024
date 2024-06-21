@@ -1,0 +1,287 @@
+:root {
+    --primary-color: #0F111A;
+    --secondary-color: #00010A;
+    --accent-color: #415eff;
+    --color-0: #3B4252;
+    --color-1: #6177bf;
+    --foreground: #e5e9f0;
+    --color-2: #0031d1;
+    --color-3: #EBCB8B;
+    --color-4: #81A1C1;
+    --color-5: #B48EAD;
+    --color-6: #88C0D0;
+    --color-8: #4C566A;
+    --color-9: #2196f3;
+
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    padding: 0 2rem;
+    margin: 0;
+    background: var(--primary-color);
+    color: var(--foreground);
+    overflow-x: hidden;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header h4 {
+    color: #fff;
+    text-shadow:
+        0 0 7px #fff,
+        0 0 10px #fff,
+        0 0 21px #fff,
+        0 0 42px var(--color-9),
+        0 0 82px var(--color-9),
+        0 0 92px var(--color-9),
+        0 0 102px var(--color-9),
+        0 0 151px var(--color-9);
+}
+
+.col {
+    margin-top: 1rem;
+}
+
+nav {
+    background-color: var(--primary-color);
+    width: 100%;
+    border-radius: 25px 25px 0 0;
+}
+
+.nav-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+}
+
+.nav__options li {
+    margin: 0px 5px;
+}
+
+.nav__options li button {
+    background-color: var(--color-9);
+    display: flex;
+    align-items: center;
+}
+
+
+.title-editor {
+    margin: 0;
+    font-size: 2rem;
+}
+
+
+/**
+* tabs
+*/
+
+.tabs {
+    margin-top: 10px;
+    background-color: var(--primary-color);
+    height: 50px;
+    border-radius: 25px 25px 0 0;
+}
+
+.tabs li a i {
+    margin-left: 15px;
+    padding: 20px;
+}
+
+.tabs .indicator {
+    background-color: var(--color-9);
+}
+
+.tabs .tab {
+    height: 64px;
+    line-height: 64px;
+}
+
+.tabs .tab a,
+.tabs .tab a.active {
+    /* background-color: transparent; */
+    color: var(--foreground);
+}
+
+.tabs .tab a:hover {
+     background-color: var(--color-9);
+    color: #D5D5D5;
+}
+
+.tabs .tab a:focus,
+.tabs .tab a:focus.active {
+     background-color: transparent; 
+    color: #BDBDBD;
+}
+
+
+.tab__panel {
+    background-color: #090a0f;
+    min-height: 39vh;
+    height: 76vh;
+    margin: 0;
+    overflow-y: auto;
+    border-radius: 20px;
+}
+
+.tab__panel__btn {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/**
+* SELECT && INPUT && DATA TABLE
+*/
+
+
+.dropdown-content li {
+    background-color: var(--secondary-color) !important;
+}
+
+.dropdown-content li:hover {
+    background-color: var(--accent-color) !important;
+}
+
+.dropdown-content li:hover span {
+    color: var(--foreground);
+}
+
+input{
+    color: var(--foreground);
+}
+
+
+.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
+    color: var(--foreground);
+}
+
+tbody tr td{
+    background-color: #090a0f !important;
+}
+
+thead, tfoot{
+    background-color: #090a0f !important;
+}
+
+
+a.paginate_button{
+    border-radius: 50% !important;
+
+}
+a.paginate_button.current{
+  /*  background: var(--accent-color) !important;*/
+    border: 0 !important;
+
+}
+
+
+
+.msj {
+    margin-top: 10px;
+    width: 50%;
+    height: 30px;
+    border-radius: 8px;
+    color: #00010A;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.CodeMirror {
+    height: 100%;
+    width: 100%;
+    border-radius: 0 0 25px 25px;
+    padding: 0 0.75rem;
+}
+
+
+#windowList {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-bottom: 2px solid var(--color-0);
+}
+
+.btn-windows {
+    flex: 1 1 auto;
+    /* Permite que los botones se redimensionen */
+    min-width: 10px;
+    background-color: var(--primary-color);
+    color: var(--foreground);
+    border: none;
+    font-size: 12px;
+}
+
+.btn-close {
+    margin-left: 5px;
+    background-color: var(--accent-color);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    color: var(--foreground);
+}
+
+.btn-add {
+    background-color: var(--color-9);
+    color: var(--foreground);
+    width: 20px;
+    border-radius: 3px;
+    border: none;
+    margin-left: 5px;
+    font-size: large;
+}
+
+#ast__visualization {
+    width: 85%;
+    height: 85%;
+    border: 1px solid var(--color-8);
+}
+
+.container__graph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
+.swal2-popup {
+    background-color: var(--primary-color) !important;
+    /* Fondo personalizado */
+    color: #333333 !important;
+    /* Color del texto personalizado */
+    border-radius: 8px;
+    /* Borde personalizado */
+}
+
+.swal2-title {
+    color: var(--foreground) !important;
+    font-family: monospace;
+    font-size: large;
+    /* Color del título personalizado */
+}
+
+.swal2-confirm {
+    background-color: var(--color-9) !important;
+    /* Color de fondo del botón */
+    color: #ffffff !important;
+    /* Color del texto del botón */
+}
