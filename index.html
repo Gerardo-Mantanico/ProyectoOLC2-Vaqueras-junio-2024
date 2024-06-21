@@ -46,19 +46,21 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
     <style type="text/css">
-        #mynetwork {
-            width: 100%;
+                #mynetwork {
+            width: 80%;
             height: 90vh;
             border: none;
+            background-color: black;
+            border-radius: 20px;   
         }
-    </style>
 
+    </style>
     <title>Proyecto Fase 1</title>
 </head>
 
 <body>
     <header>
-        <h4>Fase 1 - OLC2</h4>
+        <h4>Fase 2 - OLC2</h4>
     </header>
     <a href="" id="download" style="display: none" download=""></a>
     <div class="row">
@@ -108,8 +110,8 @@
             <ul class="tabs tabs-fixed-width  z-depth-5">
                 <li class="tab"><a href="#console-tab">    Console </a></li>
                 <li class="tab"><a href="#error__table"> Error Table </a></li>
+                <li class="tabs"><a href="#mynetwork"> ast </a></li>
             </ul>
-
             <div id="console-tab" class="col s12 tab__panel">
                 <div id="ConsoleResul"></div>
             </div>
@@ -131,7 +133,9 @@
             </div>
         </div>
     </div>
-    <div id="mynetwork"></div>
+    <div class="tab__panel__btn">
+        <div id="mynetwork"></div>
+    </div>
     <!-- ============================= PARSER ============================== -->
     <script src="Fase2/parser/parser.js"></script>
     <!-- ============================= SCRIPT ============================== -->

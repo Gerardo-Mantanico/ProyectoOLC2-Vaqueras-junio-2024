@@ -238,73 +238,128 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    const analysis = async (index) => {
+
+  /*  const analysis = async (index) => {
         cont=1;
         const primerEditor = codigo[index];
         const text = primerEditor.getValue();
         var msj = document.getElementById("msj");
         tableBody.empty();
         result.setValue("");
-        let start = performance.now();
-        let resultado = PEGFASE1.parse(text);
-        let end = performance.now();
-        let err = extractErrors(resultado); 
-        if (err.length > 0) {
-            msj.textContent = "Unsuccessfully.";
-            msj.style.backgroundColor = "#ff8c8c";
-            let output="El codigo tiene errores \n";
-            for (let i = 0; i < err.length; i++) {
-                err[i].tipo = isLexicalError(err[i].found);
-                console.log(err[i].found);
-                
-                //llenado de tabla de errores
-                table(err[i].mensaje,err[i].linea, err[i].columna,err[i].tipo);
-            }
-            for (let i = 0; i < err.length; i++) {
-                output += `Tipo: ${err[i].tipo}, Mensaje: ${err[i].mensaje}, Línea: ${err[i].linea}, Columna: ${err[i].columna}\n`;
-            }
-            result.setValue(output);
-            
-        } else {
+        try {
+            // Creando ast auxiliar
+            let ast = new Ast();
+            // Creando entorno global
+            let env = new Environment(null, 'Global');
+            // Creando generador
+            let gen = new Generator();
+            // Obteniendo árbol
+            let start = performance.now();
+            let resultado = PEGFASE1.parse(text);
+            let end = performance.now();
+            result.setValue("Codigo correctamente compilado!\n\n");
             msj.textContent = "successfully. Time: " + (end - start) + " ms";
             msj.style.backgroundColor = "#a6ffa6";
-            result.setValue("Codigo correctamente compilado!\n\n");
+            // Ejecutando instrucciones
+            RootExecuter(resultado, ast, env, gen);
+            // Generando gráfica
+            generateCst(resultado.CstTree);
+            // Generando cuádruplos
+            addDataToQuadTable(gen.getQuadruples());
+            // Agregando salida válida en consola
+        } catch (e) {
+            if (e instanceof PEGFASE1.SyntaxError) {
+                if (isLexicalError(e)) {
+                    result.setValue('Error Léxico: ' + e.message);
+                } else {
+                    result.setValue('Error Sintáctico: ' + e.message);
+                }
+            } else {
+                msj.textContent = "Unsuccessfully.";
+                msj.style.backgroundColor = "#ff8c8c";
+                result.setValue("Error de codigo!\n\n");
+                
+            }
         }
-    }
+
+    }*/
+
+        const analysis = async (index) => {
+            cont=1;
+            const primerEditor = codigo[index];
+            const text = primerEditor.getValue();
+            var msj = document.getElementById("msj");
+            tableBody.empty();
+            result.setValue("");
+            try {
+                // Creando ast auxiliar
+                let ast = new Ast();
+                // Creando entorno global
+                let env = new Environment(null, 'Global');
+                // Creando generador
+                let gen = new Generator();
+                // Obteniendo árbol
+                let start = performance.now();
+                let resulta = PEGFASE1.parse(text);
+                let end = performance.now();
+                // Ejecutando instrucciones
+                RootExecuter(resulta, ast, env, gen);
+                // Generando gráfica
+                generateCst(resulta.CstTree);
+                // Generando cuádruplos
+              //  addDataToQuadTable(gen.getQuadruples());
+                // Agregando salida válida en consola
+                result.setValue("VALIDO");
+                msj.textContent = "successfully. Time: " + (end - start) + " ms";
+                msj.style.backgroundColor = "#a6ffa6";
+            } catch (e) {
+                if (e instanceof PEGFASE1.SyntaxError) {
+                    if (isLexicalError(e)) {
+                        result.setValue('Error Léxico: ' + e.message);
+                    } else {
+                        result.setValue('Error Sintáctico: ' + e.message);
+                    }
+                } else {
+                    result.error('Error desconocido:'+ e.mensaje);
+                }
+                msj.textContent = "Unsuccessfully.";
+                msj.style.backgroundColor = "#ff8c8c";
+            }
+        }
 
 
-    const generateCst = (CstObj) => {
-        // Creando el arreglo de nodos
-        let nodes = new vis.DataSet(CstObj.Nodes);
-        // Creando el arreglo de conexiones
-        let edges = new vis.DataSet(CstObj.Edges);
-        // Obteniendo el elemento a imprimir
-        let container = document.getElementById('mynetwork');
-        // Agregando data y opciones
-        let data = {
-            nodes: nodes,
-            edges: edges
-        };
-    
-        let options = {
-            layout: {
-                hierarchical: {
-                    direction: "UD",
-                    sortMethod: "directed",
+        const generateCst = (CstObj) => {
+            // Creando el arreglo de nodos
+            let nodes = new vis.DataSet(CstObj.Nodes);
+            // Creando el arreglo de conexiones
+            let edges = new vis.DataSet(CstObj.Edges);
+            // Obteniendo el elemento a imprimir
+            let container = document.getElementById('mynetwork');
+            // Agregando data y opciones
+            let data = {
+                nodes: nodes,
+                edges: edges
+            };
+        
+            let options = {
+                layout: {
+                    hierarchical: {
+                        direction: "UD",
+                        sortMethod: "directed",
+                    },
                 },
-            },
-            nodes: {
-                shape: "box"
-            },
-            edges: { 
-                arrows: "to",
-            },
-        };
-    
-        // Generando grafico red
-        let network = new vis.Network(container, data, options);
-    }
-    
+                nodes: {
+                    shape: "box"
+                },
+                edges: { 
+                    arrows: "to",
+                },
+            };
+        
+            // Generando grafico red
+            let network = new vis.Network(container, data, options);
+        }
+        
     
     function extractErrors(inputArray) {
         const errors = [];

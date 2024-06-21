@@ -1,6 +1,6 @@
 :root {
     --primary-color: #0F111A;
-    --secondary-color: #00010A;
+    --secondary-color: #1e172d;
     --accent-color: #415eff;
     --color-0: #3B4252;
     --color-1: #6177bf;
@@ -25,9 +25,10 @@ body {
     height: 100vh;
     padding: 0 2rem;
     margin: 0;
-    background: var(--primary-color);
+    background: var(--secondary-color);
     color: var(--foreground);
     overflow-x: hidden;
+    text-align: center;
 }
 
 header {
@@ -52,6 +53,7 @@ header h4 {
 .col {
     margin-top: 1rem;
 }
+
 
 nav {
     background-color: var(--primary-color);
