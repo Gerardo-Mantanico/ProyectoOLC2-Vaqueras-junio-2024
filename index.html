@@ -16,8 +16,9 @@
     <!-- ========================== MATERIALIZE ============================ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <!-- ============================= DATA TABLE ============================== -->
-    <script type="text/javascript" charset="utf8"
-        src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+
 
     <!-- Incluyendo SweetAlert2 desde un CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -55,7 +56,7 @@
         }
 
     </style>
-    <title>Proyecto Fase 1</title>
+    <title>Proyecto Fase 2</title>
 </head>
 
 <body>
@@ -110,7 +111,8 @@
             <ul class="tabs tabs-fixed-width  z-depth-5">
                 <li class="tab"><a href="#console-tab">    Console </a></li>
                 <li class="tab"><a href="#error__table"> Error Table </a></li>
-                <li class="tabs"><a href="#mynetwork"> ast </a></li>
+                <li class="tab"><a href="#quad__table"> Quadruples </a></li>
+                <li><a class="tab"   href="#mynetwork">cst </a></li>
             </ul>
             <div id="console-tab" class="col s12 tab__panel">
                 <div id="ConsoleResul"></div>
@@ -128,6 +130,31 @@
                     </thead>
                     <tbody></tbody>
                     <tfoot>
+                    </tfoot>
+                </table>
+            </div>
+            <div id="quad__table" class="col s12 tab__panel">
+                <table id="quadTable" style="width: 100%">
+                      <thead>
+                        <tr>
+                            <th>Op</th>
+                            <th>Arg1</th>
+                            <th>Arg2</th>
+                            <th>Arg3</th>
+                            <th>Arg4</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Op</th>
+                            <th>Arg1</th>
+                            <th>Arg2</th>
+                            <th>Arg3</th>
+                            <th>Arg4</th>
+                            <th>Result</th>
+                        </tr>
                     </tfoot>
                 </table>
             </div>

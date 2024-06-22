@@ -4,6 +4,7 @@ class Quadruples {
         this.arg1 = '-';
         this.arg2 = '-';
         this.arg3 = '-';
+        this.arg4 = '-';
         this.res = '-';
     }
 
@@ -13,6 +14,7 @@ class Quadruples {
             Arg1: this.arg1,
             Arg2: this.arg2,
             Arg3: this.arg3,
+            Arg4: this.arg4,
             Result: this.res,
         };
     }
@@ -48,7 +50,20 @@ class Quadruples {
     getArg3(){
         return this.arg3;
     }
+    setArg4(arg4){
+        if(arg4) this.arg4 = arg4;
+    }
 
+    getArg4(){
+        return this.arg4;
+    }
+    setArg5(arg5){
+        if(arg5) this.arg5 = arg5;
+    }
+
+    getArg5(){
+        return this.arg5;
+    }
     setResult(res){
         if(res) this.res = res;
     }

@@ -1,16 +1,18 @@
 {
+  let instructions=[];
   function joinChars(chars) {
     return chars.join("");
   }
-
-  function reportError(location, expected) {
-    return {
-      found:expected,
-      type: "error",
-      message: `In the token ${expected}< at line ${location.start.line}, column ${location.start.column}`,
-      location: location
-    };
+  
+  function addInstructions(ins) {
+    ins.forEach(inst => {
+      if(inst!=null){
+        instructions.push(inst); 
+      }
+    });
   }
+
+
    // Creando cst 
   let cst = new Cst();
   // Agregar nodos
@@ -34,7 +36,7 @@ inicio = _ dir:directivas* _ {
   newPath(idInst, "Directiva", dir);
   let idRoot = cst.newNode();
   newPath(idRoot, 'Start', [{id:idInst}]);
-  return new Root("", "asas", "", cst);
+  return new Root("", "asas", instructions, cst);
 
 }
 
@@ -45,7 +47,8 @@ directivas
     newPath(idInst, v, ins);
     let idRoot = cst.newNode();
     newPath(idRoot, etq, [{ id:idInst }]);
-    return {id:idRoot, value:ins}
+    addInstructions(ins);
+    return new TextSection(idRoot, 'TextSection', etq, ins);
   }
   / _ etq:et id:ID dospuntos _ fin ins:instrucciones* // Directivas con IDs y dos puntos
   {
@@ -53,14 +56,16 @@ directivas
     newPath(idInst, id, ins);
     let idRoot = cst.newNode();
     newPath(idRoot, etq, [{ id:idInst }]);
-    return {id:idRoot, value:ins}
+    addInstructions(ins);
+    return new TextSection(idRoot, 'TextSection', id, ins);
   }
   /_ etq:et id:ID _ fin ins:instrucciones*{
     let idInst = cst.newNode();
     newPath(idInst, id, ins);
     let idRoot = cst.newNode();
     newPath(idRoot, etq, [{ id:idInst }]);
-    return {id:idRoot, value:ins}
+    addInstructions(ins);
+    return new TextSection(idRoot, 'TextSection', id, ins);
 
   } 
   // Directivas con IDs
@@ -70,7 +75,8 @@ directivas
     newPath(idInst, etq2, ins);
     let idRoot = cst.newNode();
     newPath(idRoot, etq1+" "+etq2, [{ id:idInst }]);
-    return {id:idRoot, value:ins}
+    addInstructions(ins);
+    return new TextSection(idRoot, 'TextSection', etq1+""+etq2, ins);
   }
   / _ id:ID dospuntos _ fin ins:instrucciones* // IDs con dos puntos
   {
@@ -78,10 +84,10 @@ directivas
     newPath(idInst, id+":", ins);
     let idRoot = cst.newNode();
     newPath(idRoot,"Inicio Etiqueta", [{ id:idInst }]);
-    return {id:idRoot, value:ins}
-  }
-  / instrucciones // Fin de línea para directivas sin más especificación
-  / ErrorRecovery // Recuperación de errores
+    addInstructions(ins);
+    return new TextSection(idRoot, 'TextSection', id, ins);
+  }// Fin de línea para directivas sin más especificación
+  /instrucciones 
 
 instrucciones
   // REGISTROS
@@ -89,130 +95,130 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
   }
 
   / _ op:"mov "i rd:rpg coma _ rs1:entero _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
   }
 
   / _ op:"mov "i rd:rpg coma _ rs1:decimal _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
   }
 
   / _ op:"mov "i rd:rpg coma _ rs1:ID _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
   }
   / _ op:"mov "i rd:rpg coma _ rs1:char _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
   }
   /_ op:"movk "i rd:rpg coma _ rs1:rpg _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movk', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd, rs1, null, null);
   }
   / _ op:"movk "i rd:rpg coma _ rs1:entero _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movk', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd, rs1, null, null);
   }
   / _ op:"movk "i rd:rpg coma _ rs1:decimal _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movk', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd, rs1, null, null);
   }
   / _ op:"movk "i rd:rpg coma _ rs1:ID _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movk', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd, rs1, null, null);
   }
   / _ op:"movk "i rd:rpg coma rs1:char _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movk', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd, rs1, null, null);
   }
   /_ op:"movn "i rd:rpg coma _ rs1:rpg _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movk', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movk', rd, rs1, null, null);
   }
   / _ op:"movn "i rd:rpg coma _ rs1:entero _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movn', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd, rs1, null, null);
   }
   / _ op:"movn "i rd:rpg coma _ rs1:decimal _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movn', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd, rs1, null, null);
   }
   / _ op:"movn "i rd:rpg coma _ rs1:ID _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movn', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd, rs1, null, null);
   }
   / _ op:"movn "i rd:rpg coma _ rs1:char _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movn', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movn', rd, rs1, null, null);
   }
   /_ op:"movz "i rd:rpg coma _ rs1:rpg _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movz', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd, rs1, null, null);
   }
   / _ op:"movz "i rd:rpg coma _ rs1:entero _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movz', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd, rs1, null, null);
   }
   / _ op:"movz "i rd:rpg coma _ rs1:decimal _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movz', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd, rs1, null, null);
   }
   / _ op:"movz "i rd:rpg coma _ rs1:ID _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movz', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd, rs1, null, null);
   }
   / _ op:"movz "i rd:rpg coma _ rs1:char _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['movz', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'movz', rd, rs1, null, null);
   }
   / _ op:"fmov "i rd:rpf coma _ rs1:regF _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['fmov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'fmov', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'fmov', rd, rs1, null, null);
   }
 
   // Instrucciones de salto y rama
@@ -221,21 +227,21 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['BL', id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BL', id.name, null, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BL', id, null, null, null);
 }
   / _ op:"B "i _ id:ID _ fin // Salto a una etiqueta ID incondicional
   {
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['B', id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'B', id.name, null, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'B', id, null, null, null);
   }
   / _ op:("RET"i/"ERET"i) _ fin // Retorna de una función
   {
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', [op]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', op.name, null, null, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', op, null, null, null, null);
   }
 
   / _ op:"Bcc "i _ id:ID _ fin
@@ -243,7 +249,7 @@ instrucciones
      const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['Bcc',id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'Bcc', id.name, null, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'Bcc', id, null, null, null);
   }
 
   / _ op:"BLR "i _ id:ID _ fin
@@ -251,41 +257,41 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['BLR', id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BLR', id.name, null, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BLR', id, null, null, null);
   }
   / _ op:"BR "i _ id:ID _ fin
   {
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['BR',id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BR', id.name, null, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BR', id, null, null, null);
   }
 
   / _ op:"CBNZ "i _ rd:rpg coma _ rs1:(rpg/nums/ID) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['CBNZ',rd,rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BLR', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'BLR', rd, rs1, null, null);
   }
 
   / _ op:"CBZ "i _ rd:rpg coma _ rs1:(rpg/nums/ID) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['CBZ',rd,rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'CBZ', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'CBZ', rd, rs1, null, null);
   }
 
   / _ op:"TBNZ "i _ rd:rpg coma _ rs1:(rpg/nums/ID) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['TBNZ',rd,rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'TBNZ', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'TBNZ', rd, rs1, null, null);
   }
   / _ op:"TBZ "i _ rd:rpg coma _ rs1:(rpg/nums/ID) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['TBZ',rd,rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'TBZ', rd.name, rs1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'TBZ', rd, rs1, null, null);
   }
 
 
@@ -294,19 +300,19 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Atomic Instructions', ['CAS',rs1,'COMA',rs2,'COMA', rs3]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CAS', rs1.name, rs2.name, rs3.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CAS', rs1, rs2, rs3, null);
   }
   / _ op:"CASA "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Atomic Instructions', ['CASA',rs1,'COMA',rs2,'COMA', rs3]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASA', rs1.name, rs2.name, rs3.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASA', rs1, rs2, rs3, null);
   }
   / _ op:"CASL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Atomic Instructions', ['CASL',rs1,'COMA',rs2,'COMA', rs3]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASL', rs1.name, rs2.name, rs3.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASL', rs1, rs2, rs3, null);
   }
 /*  / _ op:"CASAL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin*/
 
@@ -314,175 +320,175 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASAL', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASAL', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASAL', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASB', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASH', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASAB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASAB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASAB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASAB', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASAH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASAH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASAH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASAH', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASLB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASLB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASLB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASLB', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASLH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASLH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASLH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASLH', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASALB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASALB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASALB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASALB', rs1, rs2, rs3, null);
     }
     
     / _ op:"CASALH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASALH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASALH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASALH', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAB', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAH', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDALB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDALB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDALB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDALB', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDALH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDALH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDALH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDALH', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAAB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAAB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAAB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAAB', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAAH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAAH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAAH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAAH', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDA "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDA', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDA', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDA', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAA "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAA', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAA', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAA', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAL', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAL', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAL', rs1, rs2, rs3, null);
     }
     
     / _ op:"LDAAL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['LDAAL', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAAL', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'LDAAL', rs1, rs2, rs3, null);
     }
     
     / _ op:"SWP "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['SWP', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWP', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWP', rs1, rs2, rs3, null);
     }
     
     / _ op:"SWPB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['SWPB', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPB', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPB', rs1, rs2, rs3, null);
     }
     
     / _ op:"SWPH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['SWPH', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPH', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPH', rs1, rs2, rs3, null);
     }
     
     / _ op:"SWPAL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['SWPAL', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPAL', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPAL', rs1, rs2, rs3, null);
     }
     
     / _ op:"SWPA "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['SWPA', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPA', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPA', rs1, rs2, rs3, null);
     }
     
     / _ op:"SWPAAL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['SWPAAL', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPAAL', rs1.name, rs2.name, rs3.name, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'SWPAAL', rs1, rs2, rs3, null);
     }
     
    /*  / _ op:"STo "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin */ 
@@ -490,70 +496,70 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STo', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STo', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STo', rs1, rs2, null, null);
     }
     
     / _ op:"STAB "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STAB', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAB', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAB', rs1, rs2, null, null);
     }
     
     / _ op:"STAH "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STAH', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAH', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAH', rs1, rs2, null, null);
     }
     
     / _ op:"STALB "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STALB', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STALB', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STALB', rs1, rs2, null, null);
     }
     
     / _ op:"STALH "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STALH', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STALH', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STALH', rs1, rs2, null, null);
     }
     
     / _ op:"STAAB "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STAAB', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAAB', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAAB', rs1, rs2, null, null);
     }
     
     / _ op:"STAAH "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STAAH', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAAH', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAAH', rs1, rs2, null, null);
     }
     
     / _ op:"STAL "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STAL', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAL', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAL', rs1, rs2, null, null);
     }
     
     / _ op:"STA "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STA', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STA', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STA', rs1, rs2, null, null);
     }
     
     / _ op:"STAAL "i _ rs1:(rpg/nums/ID) coma _ "["rs2:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['STAAL', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAAL', rs1.name, rs2.name, null, null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'STAAL', rs1, rs2, null, null);
     }
 /*  / _ op:"CASP "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) coma _ "["rs5:(rpg/nums/ID) "]" _ fin */
 
@@ -561,28 +567,28 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASP', rs1, 'COMA', rs2,'COMA',rs3,'COMA',rs4,'COMA',rs5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASP', rs1.name, rs2.name, rs3.name, rs4.name,rs5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASP', rs1, rs2, rs3, rs4,rs5);
     }
     
     / _ op:"CASPA "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) coma _ "["rs5:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASPA', rs1, 'COMA', rs2,'COMA',rs3,'COMA',rs4,'COMA',rs5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASPA', rs1.name, rs2.name, rs3.name, rs4.name,rs5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASPA', rs1, rs2, rs3, rs4,rs5);
     }
     
     / _ op:"CASPL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) coma _ "["rs5:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASPL', rs1, 'COMA', rs2,'COMA',rs3,'COMA',rs4,'COMA',rs5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASPL', rs1.name, rs2.name, rs3.name, rs4.name,rs5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASPL', rs1, rs2, rs3, rs4,rs5);
     }
     
     / _ op:"CASPAL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) coma _ "["rs5:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Atomic Instructions', ['CASPAL', rs1, 'COMA', rs2,'COMA',rs3,'COMA',rs4,'COMA',rs5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASPAL', rs1.name, rs2.name, rs3.name, rs4.name,rs5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Atomic Instructions', 'CASPAL', rs1, rs2, rs3, rs4,rs5);
     }
     
 
@@ -591,69 +597,69 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSET', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSET', rs1.name, rs2.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSET', rs1, rs2, null, null,null);
   }
   / _ op:"CSETM "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSETM', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSETM', rs1.name, rs2.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSETM', rs1, rs2, null, null,null);
   }
   / _ op:"CINC "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CINC', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CINC', rs1.name, rs2.name, rs3.name, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CINC', rs1, rs2, rs3, null,null);
   }
   / _ op:"CINV "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CINV', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CINV', rs1.name, rs2.name, rs3.name, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CINV', rs1, rs2, rs3, null,null);
   }
   / _ op:"CNEG "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) _ fin{
     const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CNEG', rs1, 'COMA', rs2, 'COMA', rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CNEG', rs1.name, rs2.name, rs3.name, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CNEG', rs1, rs2, rs3, null,null);
   }
 
   / _ op:"CCMN "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CCMN', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CCMN', rs1.name, rs2.name, rs3.name, rs4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CCMN', rs1, rs2, rs3, rs4,null);
   }
   / _ op:"CCMP "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
        const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CCMP', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CCMP', rs1.name, rs2.name, rs3.name, rs4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CCMP', rs1, rs2, rs3, rs4,null);
   }
   
   / _ op:"CSEL "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
        const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSEL', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSEL', rs1.name, rs2.name, rs3.name, rs4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSEL', rs1, rs2, rs3, rs4,null);
   }
   / _ op:"CSINC "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSINC', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSINC', rs1.name, rs2.name, rs3.name, rs4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSINC', rs1, rs2, rs3, rs4,null);
   }
   / _ op:"CSINV "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSINV', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSINV', rs1.name, rs2.name, rs3.name, rs4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSINV', rs1, rs2, rs3, rs4,null);
   }
   / _ op:"CSNEG "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSNEG', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSNEG', rs1.name, rs2.name, rs3.name, rs4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSNEG', rs1, rs2, rs3, rs4,null);
   }
 
   // Sobre la pila
@@ -661,38 +667,38 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['SVC', rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'SVC', rd.name, null, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'SVC', rd, null, null, null,null);
   }
   / _ op: "MRS "i _ pi:pila coma _ rd: rpg _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['MRS', pi,'COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', pi.name, rd.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', pi, rd, null, null,null);
   }
 
   / _ op: "MRS "i _ rd:rpg coma _ pi:pila _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['MRS', rd,'COMA',pi]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', rd.name, pi.name,null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', rd, pi,null, null,null);
   }
   / _ op: "MRS "i _ rd:"SPSel" coma _ en:entero _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['MRS', rd,'COMA',en]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', rd.name, en.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', rd, en, null, null,null);
   }
   / _ op: "MRS "i _ rd:"DAIFSet" coma _ entero _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['MRS', pi,'COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', pi.name, rd.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', pi, rd, null, null,null);
   }
   / _ op: "MRS "i _ rd:"DAIFClr" coma _ en:entero _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['MRS', rd,'COMA',en]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', rd.name, en.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'MRS', rd, en, null, null,null);
   }
   / _ op: "NOP"i _ fin{
       const loc = location()?.start;
@@ -722,7 +728,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['SMC', rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'SMC', rd.name, null, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'SMC', rd, null, null, null,null);
   }
   / _ op: "WFE"i _ fin{
       const loc = location()?.start;
@@ -748,13 +754,13 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Comparador', ['CMP',rd,'COMA',rs1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Comparador', 'CMP', rd.name, rs1.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Comparador', 'CMP', rd, rs1, null, null,null);
   }
   / _ op: "CMN "i _ rd:rpg coma _ rs1:(nums/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Comparador', ['CMN',rd,'COMA',rs1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Comparador', 'CMN', rd.name, rs1.name, null, null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Comparador', 'CMN', rd, rs1, null, null,null);
   }
 
   // Operadores relacionales
@@ -762,56 +768,56 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BEQ',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BEQ', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BEQ', rd, null, null,null,null);
     }
     
     / _ op:"BNE "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BNE',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BNE', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BNE', rd, null, null,null,null);
     }
     
     / _ op:"BGT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BGT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BGT', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BGT', rd, null, null,null,null);
     }
     
     / _ op:"BLT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BLT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BLT', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BLT', rd, null, null,null,null);
     }
     
     / _ op:"B.EQ "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.EQ',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.EQ', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.EQ', rd, null, null,null,null);
     }
     
     / _ op:"B.GT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.GT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.GT', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.GT', rd, null, null,null,null);
     }
     
     / _ op:"B.LT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.LT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.LT', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.LT', rd, null, null,null,null);
     }
     
     / _ op:"B.NE "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.NE',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.NE', rd.name, null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.NE', rd, null, null,null,null);
     }
     
   //Mas
@@ -819,79 +825,79 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BHS "i/"B.HS "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BCC "i/"B.CC "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BLO "i/"B.LO "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BMI "i/"B.MI "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BPL "i/"B.PL "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BVS "i/"B.VS "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BVC "i/"B.VC "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BHI "i/"B.HI "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BLS "i/"B.LS "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BGE "i/"B.GE "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BLE "i/"B.LE "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
   / _ op: ("BAL "i/"B.AL "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op.name, rd.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
   }
 
 
@@ -900,7 +906,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Declaraciones', [id,etq,v]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Declaraciones', id.name, etq.name, v.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Declaraciones', etq, id, v,null,null);
   }
 
   // Operadores
@@ -908,161 +914,161 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['add', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'add', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'add', rd, op1, op2, null);
   }
 
   / _ op: "SUB "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['sub', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'sub', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'sub', rd, op1, op2, null);
   }
 
   / _ op: "MUL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['mul', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'mul', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'mul', rd, op1, op2, null);
   }
 
   / _ op: "UDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['udiv', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'udiv', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'udiv', rd, op1, op2, null);
   }
 
   / _ op: "SDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['sdiv', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'sdiv', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'sdiv', rd, op1, op2, null);
   }
 	//MAS OPERADORES
      / _ op: "NEG "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['NEG',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'NEG',op1.name,op2.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'NEG',op1,op2,null,null,null);
     }
      / _ op: "NGC "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['NGC',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'NGC',op1.name,op2.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'NGC',op1,op2,null,null,null);
     }
 	   / _ op: "ADR "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila/ID)  _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['NGC',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'ADR',rd.name,op1.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'ADR',rd,op1,null,null,null);
     }
 
      / _ op: "ADRP "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila/ID)  _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['ADRP',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'ADRP',rd.name,op1.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'ADRP',rd,op1,null,null,null);
     }
      / _ op: "MNEG "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['MNEG',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'MNEG',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'MNEG',rd,op1,op2,null,null);
     }
      / _ op: "ADC "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['ADC',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'ADC',rd,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'ADC',rd,op1,op2,null,null);
     }
   
     / _ op:"SMADDL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SMADDL',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMADDL',rd.name,op1.name,op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMADDL',rd,op1,op2,op3,null);
     }
     / _ op:"SMSUBL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SMSUBL',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMSUBL',rd.name,op1.name,op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMSUBL',rd,op1,op2,op3,null);
     }
     / _ op:"UMADDL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['UMADDL',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMADDL',rd.name,op1.name,op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMADDL',rd,op1,op2,op3,null);
     }
     / _ op:"UMSUBL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['UMSUBL',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMSUBL',rd.name,op1.name,op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMSUBL',rd,op1,op2,op3,null);
     }
     / _ op:"MADD "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['MADD',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'MADD',rd.name,op1.name,op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'MADD',rd,op1,op2,op3,null);
     }
     / _ op:"MSUB "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['MSUB',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'MSUB',rd.name,op1.name,op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'MSUB',rd,op1,op2,op3,null);
     }
 
     / _ op:"SBC "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SBC',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SBC',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SBC',rd,op1,op2,null,null);
     }
     / _ op:"SDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SDIV',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SDIV',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SDIV',rd,op1,op2,null,null);
     }
     / _ op:"SMNEGL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SMNEGL',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMNEGL',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMNEGL',rd,op1,op2,null,null);
     }
     / _ op:"SMULH "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SMULH',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMULH',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMULH',rd,op1,op2,null,null);
     }
     / _ op:"SMULL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['SMULL',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMULL',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'SMULL',rd,op1,op2,null,null);
     }
 
     / _ op:"UMNEGL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['UMNEGL',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMNEGL',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMNEGL',rd,op1,op2,null,null);
     }
     / _ op:"UMULH "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['UMULH',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMULH',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMULH',rd,op1,op2,null,null);
     }
     
     / _ op:"UMULL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Arithmetic', ['UMULL',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMULL',rd.name,op1.name,op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'UMULL',rd,op1,op2,null,null);
     }
 
 
@@ -1071,198 +1077,198 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['BFI',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFI',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFI',rd,op1,op2, op3,null);
     }
     
     / _ op:"BFXIL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['BFXIL',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFXIL',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFXIL',rd,op1,op2, op3,null);
     }
     
     / _ op:"EXTR "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['EXTR',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'EXTR',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'EXTR',rd,op1,op2, op3,null);
     }
     
     / _ op:"BFIZ "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['BFIZ',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFIZ',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFIZ',rd,op1,op2,op3,null);
     }
     
     / _ op:"SBFIZ "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SBFIZ',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SBFIZ',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SBFIZ',rd,op1,op2, op3,null);
     }
     
     / _ op:"UFIZ "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UFIZ',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UFIZ',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UFIZ',rd,op1,op2, op3,null);
     }
     
     / _ op:"BFX  "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['BFX ',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFX ',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'BFX ',rd,op1,op2, op3,null);
     }
     
     / _ op:"SBFX "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SBFX',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SBFX',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SBFX',rd,op1,op2, op3,null);
     }
     
     / _ op:"UBFX "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UBFX',rd,'COMA',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UBFX',rd.name,op1.name,op2.name, op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UBFX',rd,op1,op2, op3,null);
     }
     
   / _ op:"CLS "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['CLS',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'CLS',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'CLS',op1,op2, null,null,null);
     }
     
     / _ op:"CLZ "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['CLZ',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'CLZ',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'CLZ',op1,op2, null,null,null);
     }
     
     / _ op:"RBIT "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['RBIT',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'RBIT',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'RBIT',op1,op2, null,null,null);
     }
     
     / _ op:"REV "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['REV',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'REV',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'REV',op1,op2, null,null,null);
     }
     
     / _ op:"REV16 "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['REV16',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'REV16',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'REV16',op1,op2, null,null,null);
     }
     
     / _ op:"REV32 "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['REV32',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'REV32',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'REV32',op1,op2, null,null,null);
     }
     
     / _ op:"SXTB "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTB',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTB',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTB',op1,op2, null,null,null);
     }
     
     / _ op:"SXTH "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTH',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTH',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTH',op1,op2, null,null,null);
     }
     
     / _ op:"UXTB "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTB',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTB',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTB',op1,op2, null,null,null);
     }
     
     / _ op:"UXTH "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTH',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTH',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTH',op1,op2, null,null,null);
     }
     
     / _ op:"SXTW "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTW',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTW',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTW',op1,op2, null,null,null);
     }
     
     / _ op:"UXTW "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTW',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTW',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTW',op1,op2, null,null,null);
     }
     
     / _ op:"UXTX "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTX',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTX',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTX',op1,op2, null,null,null);
     }
     
     / _ op:"SXTX "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTX',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTX',op1.name,op2.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTX',op1,op2, null,null,null);
     }
     
 /*3*// _ op: "SXTB "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTB',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTB',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTB',op1,op2,op3,null,null);
     }
 /*3*// _ op: "UXTB "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTB',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTB',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTB',op1,op2,op3,null,null);
     }
 /*3*// _ op: "SXTW "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila)coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTW',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTW',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTW',op1,op2,op3,null,null);
     }
 /*3*// _ op: "UXTW "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila)coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTW',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTW',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTW',op1,op2,op3,null,null);
     }
 /*3*// _ op: "UXTX "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila)coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTX',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTX',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTX',op1,op2,op3,null,null);
     }
 /*3*// _ op: "SXTX "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila)coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['SXTX',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTX',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'SXTX',op1,op2,op3,null,null);
     }
 
   // Operadores lógicos y DESPLAZAMIENTO O MOVIMIENTO
@@ -1270,98 +1276,98 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['and', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'and', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'and', rd, op1, op2, null);
   }
 
   / _ op: "ANDS "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['ands', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'ands', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'ands', rd, op1, op2, null);
   }
 
   / _ op: "ORR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['orr', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'orr', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'orr', rd, op1, op2, null);
   }
 
   / _ op: "EOR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['eor', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'eor', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'eor', rd, op1, op2, null);
   }
 
   / _ op: "MVN "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mvn', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mvn', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mvn', rd, op1, op2, null);
   }
 
   / _ op: "LSL "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['lsl', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'lsl', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'lsl', rd, op1, op2, null);
   }
 
   / _ op: "LSR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['lsr', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'lsr', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'lsr', rd, op1, op2, null);
   }
 
   / _ op: "ASR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['asr', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'asr', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'asr', rd, op1, op2, null);
   }
 
   / _ op: "ROR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['ror', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'ror', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'ror', rd, op1, op2, null);
   }
     
   / _ op: "BIC "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['bic', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'bic', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'bic', rd, op1, op2, null);
   }
 
   / _ op: "BICS "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['bics', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'bics', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'bics', rd, op1, op2, null);
   }
 
   / _ op: "EON "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['eon', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'eon', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'eon', rd, op1, op2, null);
   }
 
   / _ op: "ORN "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['orn', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'orn', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'orn', rd, op1, op2, null);
   }
 
   / _ op: "TST "i _ rd:rpg coma _ op1:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['tst', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'tst', rd.name, op1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'tst', rd, op1, null, null);
   }
   
   // Carga de datos y almacenamiento
@@ -1370,168 +1376,168 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldr', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd, op1, op2, null);
   }
 
   / _ op: "LDRB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID) _ coma _ op2:(nums/rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldrb', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrb', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrb', rd, op1, op2, null);
   }
   
   / _ op: "LDR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldr', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd.name, op1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd, op1, null, null);
   }
   / _ op: "LDR "i _ rd:rpg coma _ "="_ id:(ID) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldr', rd, 'COMA', id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd.name, id.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd, id, null, null);
   }
   / _ op: "LDRB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldrb', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrb', rd.name, op1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrb', rd, op1, null, null);
   }
   / _ op: "LDRSB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldrsb', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrsb', rd.name, op1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrsb', rd, op1, null, null);
   }
   / _ op: "LDP "i _ rd:rpg coma _ op1:rpg coma _ "[" op2:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldp', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldp', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldp', rd, op1, op2, null);
   }
 
   / _ op: "STR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['str', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'str', rd.name, op1.name,null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'str', rd, op1,null, null);
   }
 
   / _ op: "STR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID) _ coma _ op2:(nums/rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['str', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'str', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'str', rd, op1, op2, null);
   }
   / _ op: "STRB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['strb', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'strb', rd.name, op1.name, null, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'strb', rd, op1, null, null);
   }
   / _ op: "STRB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID) _ coma _ op2:(nums/rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['strb', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'strb', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'strb', rd, op1, op2, null);
   }
   / _ op: "STP "i _ rd:rpg coma _ op1:rpg coma _ "[" op2:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['stp', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'stp', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'stp', rd, op1, op2, null);
   }
   
   / _ op: "LDPSW "i _ rd:rpg coma _ op1:rpg coma _ "[" op2:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldpsw', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldpsw', rd.name, op1.name, op2.name, null);
+    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldpsw', rd, op1, op2, null);
   }
   /*  / _ op: "LDUR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin */
     / _ op:"LDUR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDUR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDUR', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDUR', rd, op1, null,null,null);
     }
     
     / _ op:"LDURB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDURB',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURB', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURB', rd, op1, null,null,null);
     }
     
     / _ op:"LDURH "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDURH',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURH', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURH', rd, op1, null,null,null);
     }
     
     / _ op:"LDURS "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDURS',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURS', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURS', rd, op1, null,null,null);
     }
     
     / _ op:"LDURSB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDURSB',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURSB', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURSB', rd, op1, null,null,null);
     }
     
     / _ op:"LDURSH "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDURSH',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURSH', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURSH', rd, op1, null,null,null);
     }
     
     / _ op:"LDAR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDAR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDAR', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDAR', rd, op1, null,null,null);
     }
     
     / _ op:"LDURSW "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['LDURSW',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURSW', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'LDURSW', rd, op1, null,null,null);
     }
     
     / _ op:"PRFM "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['PRFM',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'PRFM', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'PRFM', rd, op1, null,null,null);
     }
     
     / _ op:"STUR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['STUR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'STUR', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'STUR', rd, op1, null,null,null);
     }
     
     / _ op:"STURB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['STURB',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'STURB', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'STURB', rd, op1, null,null,null);
     }
     
     / _ op:"STURH "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Load and Store Instructions', ['STURH',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'STURH', rd.name, op1, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'STURH', rd, op1, null,null,null);
     }
     
 
@@ -1544,74 +1550,74 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['LDPSW',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDPSW', op1.name, op2.name, op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDPSW', op1, op2, op3,null,null);
     }
   / _ op: "LDPSW "i _ op1:rpg coma _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]""!"? _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['LDPSW',op1,'COMA',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDPSW', op1.name, op2.name, op3.name,op4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDPSW', op1, op2, op3,op4,null);
     }
   / _ op: "LDPSW "i _ op1:rpg coma _ op2:rpg coma _ "[" op3:(rpg/ID) "]" coma _ op4:(nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['LDPSW',op1,'COMA',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDPSW', op1.name, op2.name, op3.name,op4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDPSW', op1, op2, op3,op4,null);
     }
   / _ op: "PRFM "i _ op1:("PLDL1KEEP"i/"PSTL1STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1.name, op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1, op3, null,null,null);
     }
 
   / _ op: "PRFM "i _ op1:("PSTL1KEEP"i/"PLDL2KEEP"i) coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['PRFM',op1,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1.name, op3.name, op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1, op3, op4,null,null);
     }
   / _ op: "LDUR "i _ op1:rpg coma _ "[" op3:(rpg/ID) "]" coma _ op4:(nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['LDUR',op1,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDUR', op1.name, op3.name, op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDUR', op1, op3, op4,null,null);
     }
   / _ op: "SDUR "i _ op1:rpg coma _ "[" op3:(rpg/ID) "]" coma _ op4:(nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['SDUR',op1,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'SDUR', op1.name, op3.name, op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'SDUR', op1, op3, op4,null,null);
     }
   / _ op: "STR "i  _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]"("!")? _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['STR',op1,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'STR', op1.name, op3.name, op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'STR', op1, op3, op4,null,null);
     }
   / _ op: "LDR "i  _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]"("!")? _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['LDR',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDR', op2.name, op3.name, op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'LDR', op2, op3, op4,null,null);
     }
   / _ op: "PRFM "i _ op1:("PLDL1KEEP"i) coma _ "[" op2:(rpg/ID) coma _ op3:(nums/rpg/ID) coma _ op4:("LSL"/"SXTW"/"SXTX"/rpg) coma _ op5:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['PRFM',op1,'COMA',op2,'COMA',op3,'COMA',op4,'COMA',op5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1.name, op2.name, op3.name,op4.name,op5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1, op2, op3,op4,op5);
     }
   / _ op: "PRFM "i _ op1:("PSTL1KEEP"i) coma _ "[" op2:(rpg/ID) coma _ op3:(nums/rpg/ID) coma _ op4:("LSL"/"SXTW"/"SXTX"/rpg) coma _ op5:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['PRFM',op1,'COMA',op2,'COMA',op3,'COMA',op4,'COMA',op5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1.name, op2.name, op3.name,op4.name,op5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1, op2, op3,op4,op5);
     }
   / _ op: "PRFM "i _ op1:("PLDL2KEEP"i) coma _ "[" op2:(rpg/ID) coma _ op3:(nums/rpg/ID) coma _ op4:("LSL"/"SXTW"/"SXTX"/rpg) coma _ op5:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['PRFM',op1,'COMA',op2,'COMA',op3,'COMA',op4,'COMA',op5]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1.name, op2.name, op3.name,op4.name,op5.name);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'PRFM', op1, op2, op3,op4,op5);
     }
 
   //OPERACIONES ATOMICAS
@@ -1619,25 +1625,25 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'operation atomic', ['ADD',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'ADD', rd.name,op1.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'ADD', rd,op1, null,null,null);
     }
     / _ op: "CLR "i _ "["rd:(rpg/pila) "]" coma _ op1:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'operation atomic', ['CLR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'CLR', rd.name,op1.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'CLR', rd,op1, null,null,null);
     }
     / _ op: "EOR "i _ "["rd:(rpg/pila) "]" coma _ op1:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'operation atomic', ['EOR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'EOR', rd.name,op1.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'EOR', rd,op1, null,null,null);
     }
     / _ op: "SET "i _ "["rd:(rpg/pila) "]" coma _ op1:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'operation atomic', ['SET',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'SET', rd.name,op1.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'operation atomic', 'SET', rd,op1, null,null,null);
     }
 
     //REGISTRO DE PROPOSITO ESPECIFICO
@@ -1645,141 +1651,141 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'reg specific p ', ['MSR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'reg specific p', 'MSR', rd.name,op1.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'reg specific p', 'MSR', rd,op1, null,null,null);
     }
     / _ op: "MSR "i _ rd:rpg coma _ op1:rpes _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'reg specific p ', ['MSR',rd,'COMA',op1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'reg specific p', 'MSR', rd.name,op1.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'reg specific p', 'MSR', rd,op1, null,null,null);
     }
     //KEYS
     / _ op: "PRFM "i _ op1:("PLDL3KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLDL1STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLDL2STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLDL3STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLIL1KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLIL2KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLIL3KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLIL1STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLIL2STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PLIL3STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PSTL1KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PSTL2KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PSTL3KEEP"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PSTL1STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PSTL2STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     / _ op: "PRFM "i _ op1:("PSTL3STRM"i) coma _ "[" op3:(rpg/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Keys', ['PRFM',op1,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1.name,op3.name, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'Keys', 'PRFM', op1,op3, null,null,null);
     }
     
   / _ op: "ADD "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) coma _ "LSL " _ op3:(nums/ID/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['ADD',rd,'COMA',op1,'COMA',op2,'COMA','LSL',op3,]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'ADD', rd.name, op1.name, op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'ADD', rd, op1, op2,op3,null);
     }
   / _ op: "SUB "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) coma _ "L" _ op3:(nums/ID/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['SUB',rd,'COMA',op1,'COMA',op2,'COMA','LSL',op3,]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'SUB', rd.name, op1.name, op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'SUB', rd, op1, op2,op3,null);
     }
   / _ op: "MUL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) coma _ "LSL " _ op3:(nums/ID/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['MUL',rd,'COMA',op1,'COMA',op2,'COMA','LSL',op3,]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'MUL', rd.name, op1.name, op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'MUL', rd, op1, op2,op3,null);
     }
   / _ op: "UDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) coma _ "LSL " _ op3:(nums/ID/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['UDIV',rd,'COMA',op1,'COMA',op2,'COMA','LSL',op3,]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'UDIV', rd.name, op1.name, op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'UDIV', rd, op1, op2,op3,null);
     }
   / _ op: "SDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) coma _ "LSL " _ op3:(nums/ID/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'direccionamiento (addr)', ['SDIV',rd,'COMA',op1,'COMA',op2,'COMA','LSL',op3,]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'SDIV', rd.name, op1.name, op2.name,op3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'direccionamiento (addr)', 'SDIV', rd, op1, op2,op3,null);
     }
   
   //Instrucciones de suma de comprobación:
@@ -1787,49 +1793,49 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32B',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32B', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32B', rd,op1, op2,null,null);
     }
   / _ op: "CRC32H "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32H',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32H', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32H', rd,op1, op2,null,null);
     }
   / _ op: "CRC32W "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32W',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32W', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32W', rd,op1, op2,null,null);
     }
   / _ op: "CRC32X "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32X',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32X', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32X', rd,op1, op2,null,null);
     }
   / _ op: "CRC32CB "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32CB',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CB', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CB', rd,op1, op2,null,null);
     }
   / _ op: "CRC32CH "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32CH',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CH', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CH', rd,op1, op2,null,null);
     }
   / _ op: "CRC32CW "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32CW',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CW', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CW', rd,op1, op2,null,null);
     }
   / _ op: "CRC32CX "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'LSI with Attribute', ['CRC32CX',rd,'COMA',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CX', rd.name,op1.name, op2.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'LSI with Attribute', 'CRC32CX', rd,op1, op2,null,null);
     }
 
   //nstrucciones de carga y almacenamiento con atributos:
@@ -1837,20 +1843,20 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDAXP',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDAXP', rs1.name,rs2.name, rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDAXP', rs1,rs2, rs3,null,null);
     }
   / _ op:"LDAXR "i _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDAXR',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDAXR', rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDAXR', rs2,rs3,null,null,null);
     }
   
   / _ op:"LDXRB "i _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDXRB',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDXRB', rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDXRB', rs2,rs3,null,null,null);
     }
   
   / _ op: "LDNP "i _ op1:rpg coma _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDNP X0, X1, [X2] 
@@ -1858,209 +1864,209 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDNP',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDNP',op1.name,op2.name,op3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDNP',op1,op2,op3,null,null);
   }
   / _ op: "LDNP "i _ op1:rpg coma _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin  {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDNP',op1,'COMA',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDNP',op1.name,op2.name,op3.name,op4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDNP',op1,op2,op3,op4,null);
   }
   / _ op: "LDTR "i _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDTR X0, [X2]
   {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTR',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTR',op2.name,op3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTR',op2,op3,null,null,null);
   }
   / _ op: "LDTRB "i _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDTR X0, [X2]
       {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRB',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRB',op2.name,op3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRB',op2,op3,null,null,null);
   }
   / _ op: "LDTRH "i _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDTR X0, [X2]
       {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRH',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRH',op2.name,op3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRH',op2,op3,null,null,null);
   }
   / _ op: "LDTRSB "i _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDTR X0, [X2]
       {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRSB',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSB',op2.name,op3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSB',op2,op3,null,null,null);
   }
   / _ op: "LDTRSH "i _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDTR X0, [X2]
       {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRSH',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSH',op2.name,op3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSH',op2,op3,null,null,null);
   }
   / _ op: "LDTRSW "i _ op2:rpg coma _ "[" op3:(rpg/ID/nums)"]" _ fin//LDTR X0, [X2]
       {
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRSW',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSW',op2.name,op3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSW',op2,op3,null,null,null);
   }
 
   / _ op: "LDTR "i _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTR',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTR',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTR',op2,op3,op4,null,null);
   }
 
   / _ op: "LDTRB"i _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRB',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRB',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRB',op2,op3,op4,null,null);
   }
   / _ op: "LDTRH "i _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRH',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRH',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRH',op2,op3,op4,null,null);
   }
   / _ op: "LDTRSB"i _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRSB',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSB',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSB',op2,op3,op4,null,null);
   }
   / _ op: "LDTRSH "i _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRSH',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSH',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSH',op2,op3,op4,null,null);
   }
   / _ op:"STLR "i _ rs2:(rpg) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLR',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLR',rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLR',rs2,rs3,null,null,null);
   }
   / _ op:"STLRB "i _ rs2:(rpg) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLRB',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLRB',rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLRB',rs2,rs3,null,null,null);
   }
   / _ op:"STLRH "i _ rs2:(rpg) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLRH',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLRH',rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLRH',rs2,rs3,null,null,null);
   }
   / _ op:"STTR "i _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STTR',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTR',rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTR',rs2,rs3,null,null,null);
   }
   / _ op:"STTRB "i _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STTRB',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRB',rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRB',rs2,rs3,null,null,null);
   }
   / _ op:"STTRH "i _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STTRH',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRH',rs2.name,rs3.name,null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRH',rs2,rs3,null,null,null);
   }
   / _ op:"STXP "i _ rs0:(rpg/nums/ID) coma _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STXP',rs0,'COMA',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXP',rs0.name,rs1.name,rs2.name,rs3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXP',rs0,rs1,rs2,rs3,null);
   }
   / _ op:"STLXP "i _ rs0:(rpg/nums/ID) coma _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLXP',rs0,'COMA',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXP',rs0.name,rs1.name,rs2.name,rs3.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXP',rs0,rs1,rs2,rs3,null);
   }
   / _ op:"STXR "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STXR',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXR',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXR',rs1,rs2,rs3,null,null);
   }
   / _ op:"STLXR "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLXR',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXR',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXR',rs1,rs2,rs3,null,null);
   }
   / _ op:"STXRB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STXRB',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXRB',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXRB',rs1,rs2,rs3,null,null);
   }
   / _ op:"STLXRB "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLXRB',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXRB',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXRB',rs1,rs2,rs3,null,null);
   }
   / _ op:"STXRH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STXRH',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXRH',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STXRH',rs1,rs2,rs3,null,null);
   }
   / _ op:"STLXRH "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STLXRH',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXRH',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STLXRH',rs1,rs2,rs3,null,null);
   }
   / _ op:"STNP "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ "["rs3:(rpg/nums/ID) "]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STNP',rs1,'COMA',rs2,'COMA',rs3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STNP',rs1.name,rs2.name,rs3.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STNP',rs1,rs2,rs3,null,null);
   }
 
   / _ op:"STNP "i _ op1:(rpg/nums/ID) coma _ op2:(rpg/nums/ID) coma _ "[" op3:(rpg/ID/nums) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STNP',op1,'COMA',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STNP',op1.name,op2.name,op3.name,op4.name,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STNP',op1,op2,op3,op4,null);
   }
 
   / _ op: "LDTRSW "i _ op2:rpg coma _ "[" op3:(rpg/ID) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['LDTRSW',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSW',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'LDTRSW',op2,op3,op4,null,null);
   }
   / _ op:"STTR "i _ op2:(rpg/nums/ID) coma _ "[" op3:(rpg/ID/nums) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STTR',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTR',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTR',op2,op3,op4,null,null);
   }
   / _ op:"STTRB "i _ op2:(rpg/nums/ID) coma _ "[" op3:(rpg/ID/nums) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STTRB',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRB',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRB',op2,op3,op4,null,null);
   }
   / _ op:"STTRH "i _ op2:(rpg/nums/ID) coma _ "[" op3:(rpg/ID/nums) coma _ op4:(nums/rpg/ID)"]" _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'ICAC atribut', ['STTRH',op2,'COMA',op3,'COMA',op4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRH',op2.name,op3.name,op4.name,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'ICAC atribut', 'STTRH',op2,op3,op4,null,null);
   }
 
   //INSTRUCCIONES DEL SISTEMA
@@ -2070,125 +2076,125 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E0R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E0R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E0R', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E1R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E1R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E1R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E1R', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E2R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E2R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E2R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E2R', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E3R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E3R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E3R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E3R', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E0W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E0W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E0W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E0W', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E1W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E1W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E1W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E1W', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E2W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E2W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E2W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E2W', rd,null, null,null,null);
     }
     
     / _ op:"AT S1E3W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S1E3W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E3W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S1E3W', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E0R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E0R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E0R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E0R', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E1R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E1R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E1R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E1R', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E2R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E2R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E2R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E2R', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E3R"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E3R','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E3R', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E3R', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E0W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E0W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E0W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E0W', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E1W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E1W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E1W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E1W', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E2W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E2W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E2W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E2W', rd,null, null,null,null);
     }
     
     / _ op:"AT S2E3W"i coma _ rd:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['AT S2E3W','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E3W', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'AT S2E3W', rd,null, null,null,null);
     }
     
   / _ op: "BRK "i coma _ rd:(nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['BRK','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'BRK', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'BRK', rd,null, null,null,null);
     }
   / _ op: "CLREX "i coma _ rd:(nums/ID) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['CLREX','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'CLREX', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'CLREX', rd,null, null,null,null);
     }
   / _ op: "DMB SY"i _ fin{
       const loc = location()?.start;
@@ -2254,7 +2260,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['HVC','COMA',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'HVC', rd.name,null, null,null,null);
+      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'HVC', rd,null, null,null,null);
     }
   / _ op: "ISB"i _ fin{
       const loc = location()?.start;
@@ -2273,9 +2279,9 @@ instrucciones
 et = pr:palabraReservada " "? _{return pr;}
 
 nums
-  = _ decimal
-  / _ entero
-  / _ flotante
+  = _ n:flotante{return n;}
+  / _ n:entero{return n;}
+  / _ n:decimal{return n;}
 
 caracter = "'" char:[a-zA-Z] "'"{return char;}
 char "char" = _ "#"c:caracter {return c;}
@@ -2414,19 +2420,37 @@ palabraReservada = (".global"
 
 string "texto"= "\"" chars:[^\"]* "\"" { return joinChars(chars); }
 
-entero "entero"= _ "#" ("-"?)i:[0-9]+ { return parseInt(i.join(""), 10); }
-        / _ ("-"?)i:[0-9]+ { return parseInt(i.join(""), 10); }
+entero "entero"= _ "#"? s:"-"? i:[0-9]+ {
+    let n ="";
+    if(s=='-'){
+      n+="-";
+    }
+    i.forEach(e => {
+      n+=""+e;
+    });
+    return n;
+  }
 
 decimal "decimal"= _ "#" "0x" i:[0-9A-Fa-f]+
          / _ ("0x"i/"0b") i:[0-9A-Fa-f]+
 
-flotante "flotante"= _ "#" i:[0-9]+ "." d:[0-9]+ { return parseFloat(i.join("") + "." + d.join("")); }
-         / _ i:[0-9]+ "." d:[0-9]+ { return parseFloat(i.join("") + "." + d.join("")); }
-
+flotante "flotante"= _ "#"? s:"-"? i:([0-9]+) "." d:([0-9]+) { 
+  let n ="";
+  if(s=='-'){
+    n+="-";
+  }
+  i.forEach(e => {
+      n+=""+e;
+  }); n+=".";
+  d.forEach(e => {
+      n+=""+e;
+  });
+  return n;
+ }
 coma "coma" = _ "," { return ","; }
 dospuntos "dos puntos"= ":"
 
-fin "FinLinea"= ["\n"]+
+fin "FinLinea"= (_["\n"])+
 
 ID "ID"= [a-zA-Z_][a-zA-Z0-9_]* {return text()}
 
@@ -2440,5 +2464,5 @@ inComent = "//"
 
 ErrorRecovery
   = unexpected:[^ \t\n\r]+ {
-      return reportError(location(), text());
+      //return reportError(location(), text());
     }

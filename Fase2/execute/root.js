@@ -1,9 +1,9 @@
 class Root {
 
-    constructor(global, dataSection, textSection, cst) {
+    constructor(global, dataSection, instrucciones, cst) {
         this.global = global;
         this.dataSection = dataSection;
-        this.textSection = textSection;
+        this.textSection = instrucciones;
         this.CstTree = cst;
     }
 

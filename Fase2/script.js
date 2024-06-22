@@ -1,4 +1,31 @@
-document.addEventListener("DOMContentLoaded", function () {
+let quadTable;
+
+$(document).ready(function () {
+
+    quadTable = newDataTable('#quadTable',
+        [{data: "Op"}, {data: "Arg1"}, {data: "Arg2"}, {data: "Arg3"}, {data: "Arg4"},{data: "Result"}],
+        []);
+
+    $('.tabs').tabs();
+    $("select").formSelect();
+    $('.tooltipped').tooltip();
+
+
+});
+const newDataTable = (id, columns, data) => {
+    let result = $(id).DataTable({
+        responsive: true,
+        lengthMenu: [[15, 25, 50, -1], [15, 25, 50, "All"]],
+        "lengthChange": true,
+        data,
+        columns
+    });
+    $('select').formSelect();
+    return result;
+}
+
+// Función para agregar datos a la tabla de cuadruplos
+
     const editorContainer = document.getElementById("editorContainer");
     const ConsoleResul = document.getElementById("ConsoleResul");
     const windowList = document.getElementById("windowList");
@@ -7,12 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var tableBody = $('#errorTable tbody');
     const errors = [];
     let cont=1;
-
-    $(document).ready(function () {
-        $('.tabs').tabs();
-        $("select").formSelect();
-        $('.tooltipped').tooltip();
-    });
 
 
     // Función para agregar una nueva ventana de edición
@@ -285,6 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }*/
 
         const analysis = async (index) => {
+            clearQuadTable();
             cont=1;
             const primerEditor = codigo[index];
             const text = primerEditor.getValue();
@@ -307,21 +329,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Generando gráfica
                 generateCst(resulta.CstTree);
                 // Generando cuádruplos
-              //  addDataToQuadTable(gen.getQuadruples());
+                addDataToQuadTable(gen.getQuadruples());
                 // Agregando salida válida en consola
-                result.setValue("VALIDO");
+                result.setValue("codigo correctamente compilado!!!");
                 msj.textContent = "successfully. Time: " + (end - start) + " ms";
                 msj.style.backgroundColor = "#a6ffa6";
             } catch (e) {
-                if (e instanceof PEGFASE1.SyntaxError) {
-                    if (isLexicalError(e)) {
-                        result.setValue('Error Léxico: ' + e.message);
-                    } else {
-                        result.setValue('Error Sintáctico: ' + e.message);
-                    }
-                } else {
-                    result.error('Error desconocido:'+ e.mensaje);
-                }
+                document.getElementById('mynetwork').innerHTML="";
+                result.setValue('Error encontrado:\n'+ e);
                 msj.textContent = "Unsuccessfully.";
                 msj.style.backgroundColor = "#ff8c8c";
             }
@@ -470,4 +485,14 @@ document.addEventListener("DOMContentLoaded", function () {
     addEditorWindow();
     consolaWindow();
 
-});
+    const addDataToQuadTable = (data) => {
+        console.log(data);
+        for (let quad of data) {
+            console.log(quad.getQuadruple());
+            quadTable.row.add(quad?.getQuadruple()).draw();
+        }
+    }
+    
+    const clearQuadTable = () => {
+        quadTable.clear().draw();
+    }
