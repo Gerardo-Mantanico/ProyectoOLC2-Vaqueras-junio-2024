@@ -44,7 +44,7 @@ directivas
   = _ etq:et v:(nums/string)? _ fin ins:instrucciones* // Directivas con números o cadenas
   {
     let idInst = cst.newNode();
-    newPath(idInst, v, ins);
+    newPath(idInst, etq, ins);
     let idRoot = cst.newNode();
     newPath(idRoot, etq, [{ id:idInst }]);
     addInstructions(ins);
