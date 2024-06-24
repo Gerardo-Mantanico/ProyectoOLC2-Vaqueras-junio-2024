@@ -35,7 +35,7 @@ inicio = _ dir:directivas* _ {
   let idInst = cst.newNode();
   newPath(idInst, "Directiva", dir);
   let idRoot = cst.newNode();
-  newPath(idRoot, 'Start', [{id:idInst}]);
+  newPath(idRoot, 'Calificacion', [{id:idInst}]);
   return new Root("", "asas", instructions, cst);
 
 }
