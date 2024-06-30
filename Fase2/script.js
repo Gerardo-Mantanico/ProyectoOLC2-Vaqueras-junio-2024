@@ -3,6 +3,7 @@ import windows from "./controllers/windows.js";
 import saveFile from "./controllers/export.js";
 import { generateCst } from "./cst/generateCst.js";
 import {clearQuadTable,addDataToQuadTable } from "./table/QuadTable.js";
+import {isLexicalError} from "./lexical/lexical.js"
 
 const analysis = async (codigo, consoleResult) => {
     clearQuadTable();
@@ -24,6 +25,11 @@ const analysis = async (codigo, consoleResult) => {
         msj.textContent = "successfully. Time: " + (end - start) + " ms";
         msj.style.backgroundColor = "#a6ffa6";
     } catch (e) {
+        if (isLexicalError(e)){
+            info += `<tr><td>1</td><td>${"Léxico"}</td><td>${"Se ha encontrado un caracter que no pertenece al lenguaje: " + e.found}</td><td>${e.location.start.line}</td><td>${e.location.start.column}</td></tr>`
+        }else {
+            info += `<tr><td>1</td><td>${"Sintátctico"}</td><td>${e.message}</td><td>${e.location.start.line}</td><td>${e.location.start.column}</td></tr>`
+        }
         document.getElementById('mynetwork').innerHTML = "";
         consoleResult.setValue('Error encontrado:\n' + e);
         msj.textContent = "Unsuccessfully.";

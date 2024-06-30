@@ -1,4 +1,4 @@
-function isLexicalError(found) {
+ export function isLexicalError(found) {
     const validIdentifier = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
     const validInteger = /^[0-9]+$/;
     const validCommentSingleLine = /^\/\/[^\n]*$/; // Comentarios de una sola línea

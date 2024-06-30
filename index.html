@@ -18,8 +18,6 @@
     <!-- ============================= DATA TABLE ============================== -->
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
-
-
     <!-- Incluyendo SweetAlert2 desde un CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Scripts for Codemirror -->
@@ -43,25 +41,27 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Theme dracula-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/theme/dracula.min.css">
-    <link rel="stylesheet" href="Fase1/style.css">
+    <link rel="stylesheet" href="Fase3/style.css">
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
-    <style type="text/css">
-                #mynetwork {
-            width: 80%;
-            height: 90vh;
-            border: none;
-            background-color: black;
-            border-radius: 20px;   
-        }
-
-    </style>
-    <title>Proyecto Fase 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/midnight.min.css"
+    integrity="sha512-ZTF0X2l7PXEFDyP+MSOK0QM3Qh+C+lQ70Tqx4vQb3+6Uxh2lYkwmbSbpDmksZaX8w0sSz8ctVBnPSzAR1TQlzA==" 
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>ARM64</title>
 </head>
 
 <body>
     <header>
-        <h4>Fase 2 - OLC2</h4>
+        <a href=""><h4> ARM64</h4></a>
+        <div class="col s12 m12 l6">
+            <ul class="tabs tabs-fixed-width  z-depth-5">
+                <li class="tab"><a href="#console-tab">Console </a></li>
+                <li class="tab"><a href="#error__table">Error Table </a></li>
+                <li class="tab"><a href="#quad__table">Quadruples </a></li>
+                <li><a class="tab"   href="#mynetwork">cst </a></li>
+            </ul>
+        </div>
+
     </header>
     <a href="" id="download" style="display: none" download=""></a>
     <div class="row">
@@ -108,12 +108,6 @@
             </div>
         </div>
         <div class="col s12 m12 l6">
-            <ul class="tabs tabs-fixed-width  z-depth-5">
-                <li class="tab"><a href="#console-tab">    Console </a></li>
-                <li class="tab"><a href="#error__table"> Error Table </a></li>
-                <li class="tab"><a href="#quad__table"> Quadruples </a></li>
-                <li><a class="tab"   href="#mynetwork">cst </a></li>
-            </ul>
             <div id="console-tab" class="col s12 tab__panel">
                 <div id="ConsoleResul"></div>
             </div>
@@ -121,7 +115,6 @@
                 <table id="errorTable" style="width: 100%">
                       <thead>
                         <tr>
-                            <th>No.</th>
                             <th>Description</th>
                             <th>Row</th>
                             <th>Column</th>
@@ -164,24 +157,24 @@
         <div id="mynetwork"></div>
     </div>
     <!-- ============================= PARSER ============================== -->
-    <script src="Fase2/parser/parser.js"></script>
+    <script src="Fase3/parser/parser.js"></script>
     <!-- ============================= SCRIPT ============================== -->
-    <script src="Fase2/script.js" type="module"></script>
+    <script src="Fase3/script.js" type="module"></script>
     <!-- ============================= CST ============================== -->
-    <script src="Fase2/interfaces/expression.js"></script>
-    <script src="Fase2/interfaces/instruction.js"></script>
-    <script src="Fase2/environment/ast.js"></script>
-    <script src="Fase2/environment/cst.js"></script>
-    <script src="Fase2/environment/environment.js"></script>
-    <script src="Fase2/generator/generator.js"></script>
-    <script src="Fase2/generator/quadruples.js"></script>
-    <script src="Fase2/execute/executer.js"></script>
-    <script src="Fase2/execute/root.js"></script>
-    <script src="Fase2/execute/textSection.js"></script>
+    <script src="Fase3/interfaces/expression.js"></script>
+    <script src="Fase3/interfaces/instruction.js"></script>
+    <script src="Fase3/environment/ast.js"></script>
+    <script src="Fase3/environment/cst.js"></script>
+    <script src="Fase3/environment/environment.js"></script>
+    <script src="Fase3/generator/generator.js"></script>
+    <script src="Fase3/generator/quadruples.js"></script>
+    <script src="Fase3/execute/executer.js"></script>
+    <script src="Fase3/execute/root.js"></script>
+    <script src="Fase3/execute/textSection.js"></script>
     <!-- ============================= EXPRESSIONS ============================== -->
-    <script src="Fase2/expressions/operation.js"></script>
+    <script src="Fase3/expressions/operation.js"></script>
     <!-- ============================= EXPRESSIONS ============================== -->
-    <script src="Fase2/instructions/systemCall.js"></script>
+    <script src="Fase3/instructions/systemCall.js"></script>
 
 </body>
 </html>
