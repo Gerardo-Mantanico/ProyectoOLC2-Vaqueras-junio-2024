@@ -5,5 +5,6 @@ class Symbolo {
         this.id = id;
         this.type = type;
         this.value = value;
+        this.puntero=0;
     }
 }

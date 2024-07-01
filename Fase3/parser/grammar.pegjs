@@ -1,15 +1,32 @@
 {
+  let dataSection=[];
   let instructions=[];
+  let errors=[];
+ 
   function joinChars(chars) {
     return chars.join("");
   }
-  
+  function addDataSection(ins) {
+    ins.forEach(e => {
+      if(e!=null){
+        dataSection.push(e);
+      }
+    });
+  }
   function addInstructions(ins) {
     ins.forEach(inst => {
       if(inst!=null){
         instructions.push(inst); 
       }
     });
+  }
+  function reportError(location, expected) {
+    return {
+      found:expected,
+      type: "error",
+      message: `In the token ${expected}< at line ${location.start.line}, column ${location.start.column}`,
+      location: location
+    };
   }
 
 
@@ -28,14 +45,6 @@
       cst.addEdge(idRoot, newNode);
     }
   }
-    function reportError(location, expected) {
-    return {
-      found:expected,
-      type: "error",
-      message: `In the token ${expected}< at line ${location.start.line}, column ${location.start.column}`,
-      location: location
-    };
-  }
 }
 
 
@@ -43,19 +52,20 @@ inicio = _ dir:directivas* _ {
   let idInst = cst.newNode();
   newPath(idInst, "Directiva", dir);
   let idRoot = cst.newNode();
-  newPath(idRoot, 'Calificacion', [{id:idInst}]);
-  return new Root("", "asas", instructions, cst);
+  newPath(idRoot, 'Start', [{id:idInst}]);
 
+  return new Root("", dataSection, instructions, cst);  
+  
 }
 
 directivas
-  = _ etq:et v:(nums/string)? _ fin ins:instrucciones* // Directivas con números o cadenas
+  = _ etq:et _ fin ins:instrucciones* // Directivas con números o cadenas
   {
     let idInst = cst.newNode();
     newPath(idInst, etq, ins);
     let idRoot = cst.newNode();
     newPath(idRoot, etq, [{ id:idInst }]);
-    addInstructions(ins);
+    addDataSection(ins);
     return new TextSection(idRoot, 'TextSection', etq, ins);
   }
   / _ etq:et id:ID dospuntos _ fin ins:instrucciones* // Directivas con IDs y dos puntos
@@ -95,7 +105,7 @@ directivas
     addInstructions(ins);
     return new TextSection(idRoot, 'TextSection', id, ins);
   }// Fin de línea para directivas sin más especificación
-  /instrucciones
+  /ins:instrucciones {}
   /ErrorRecovery
 
 instrucciones
@@ -104,34 +114,34 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
+    return new Move(loc?.line, loc?.column, idRoot, rd, rs1);
   }
 
   / _ op:"mov "i rd:rpg coma _ rs1:entero _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
+    return new Move(loc?.line, loc?.column, idRoot, rd, rs1);
   }
 
   / _ op:"mov "i rd:rpg coma _ rs1:decimal _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
+    return new Move(loc?.line, loc?.column, idRoot, rd, rs1);
   }
 
   / _ op:"mov "i rd:rpg coma _ rs1:ID _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
+    return new Move(loc?.line, loc?.column, idRoot, rd, rs1);
   }
   / _ op:"mov "i rd:rpg coma _ rs1:char _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['mov', rd, 'COMA', rs1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'mov', rd, rs1, null, null);
+    return new Move(loc?.line, loc?.column, idRoot, rd, rs1);
   }
   /_ op:"movk "i rd:rpg coma _ rs1:rpg _ fin{
     const loc = location()?.start;
@@ -676,7 +686,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'System Instructions', ['SVC', rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'System Instructions', 'SVC', rd, null, null, null,null);
+      return new SystemCall(loc?.line, loc?.column, idRoot, rd);
   }
   / _ op: "MRS "i _ pi:pila coma _ rd: rpg _ fin{
       const loc = location()?.start;
@@ -911,11 +921,13 @@ instrucciones
 
 
   // Declaraciones
-  / _ id:ID _ dospuntos _ etq:et _ v:(nums/string) _ fin{
+  / _ id:ID _ dospuntos  fin?  _ etq:et _ v:(nums/string) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Declaraciones', [id,etq,v]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Declaraciones', etq, id, v,null,null);
+      let ins = new Declaration(loc?.line, loc?.column, idRoot, id,etq,v);
+      //instructions.push(ins);
+      return ins;
   }
 
   // Operadores
@@ -923,35 +935,35 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['add', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'add', rd, op1, op2, null);
+    return new numOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "SUB "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['sub', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'sub', rd, op1, op2, null);
+    return new numOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "MUL "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['mul', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'mul', rd, op1, op2, null);
+    return new numOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "UDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['udiv', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'udiv', rd, op1, op2, null);
+    return new numOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "SDIV "i _ rd:(rpg/pila) coma _ op1:(rpg/nums/pila) coma _ op2:(rpg/nums/pila) _ fin{
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Arithmetic', ['sdiv', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Arithmetic', 'sdiv', rd, op1, op2, null);
+    return new numOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 	//MAS OPERADORES
      / _ op: "NEG "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
@@ -1205,7 +1217,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTB',op1,'COMA',op2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTB',op1,op2, null,null,null);
+      return new Uxtb(loc?.line, loc?.column, idRoot,op1,op2,null);
     }
     
     / _ op:"UXTH "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila) _ fin{
@@ -1253,7 +1265,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'IDMD BITS', ['UXTB',op1,'COMA',op2,'COMA',op3]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'IDMD BITS', 'UXTB',op1,op2,op3,null,null);
+      return new Uxtb(loc?.line, loc?.column, idRoot,op1,op2,op3);
     }
 /*3*// _ op: "SXTW "i _ op1:(rpg/pila) coma _ op2:(rpg/nums/pila)coma _ op3:(rpg/nums/pila) _ fin{
       const loc = location()?.start;
@@ -1285,7 +1297,7 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['and', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'and', rd, op1, op2, null);
+    return new LogicOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "ANDS "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
@@ -1299,14 +1311,14 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['orr', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'orr', rd, op1, op2, null);
+    return new LogicOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "EOR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['eor', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'eor', rd, op1, op2, null);
+    return new LogicOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "MVN "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
@@ -1320,28 +1332,28 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['lsl', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'lsl', rd, op1, op2, null);
+    return new opDesplazamiento(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "LSR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['lsr', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'lsr', rd, op1, op2, null);
+    return new opDesplazamiento(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "ASR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['asr', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'asr', rd, op1, op2, null);
+    return new opDesplazamiento(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "ROR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['ror', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'ror', rd, op1, op2, null);
+    return new opDesplazamiento(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
     
   / _ op: "BIC "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{
@@ -1392,7 +1404,7 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldrb', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrb', rd, op1, op2, null);
+    return new Ldrb(loc?.line, loc?.column, idRoot, rd, op1,op2); 
   }
   
   / _ op: "LDR "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
@@ -1405,14 +1417,13 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldr', rd, 'COMA', id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldr', rd, id, null, null);
+    return new Ldr(loc?.line, loc?.column, idRoot, rd, id); 
   }
   / _ op: "LDRB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['ldrb', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'ldrb', rd, op1, null, null);
-  }
+    return new Ldrb(loc?.line, loc?.column, idRoot, rd, op1,null);   }
   / _ op: "LDRSB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
@@ -1443,13 +1454,13 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['strb', rd, 'COMA', op1]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'strb', rd, op1, null, null);
+    return new Strb(loc?.line, loc?.column, idRoot, rd, op1, null);
   }
   / _ op: "STRB "i _ rd:rpg coma _ "[" op1:(rpg/pila/ID) _ coma _ op2:(nums/rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Load and Store Instructions', ['strb', rd, 'COMA', op1,'COMA',op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Load and Store Instructions', 'strb', rd, op1, op2, null);
+    return new Strb(loc?.line, loc?.column, idRoot, rd, op1, op2);
   }
   / _ op: "STP "i _ rd:rpg coma _ op1:rpg coma _ "[" op2:(rpg/pila/ID)"]" _ fin{
     const loc = location()?.start;
@@ -2427,7 +2438,12 @@ palabraReservada = (".global"
                  / ".popsection"
                  /".rodata"){return text()}
 
-string "texto"= "\"" chars:[^\"]* "\"" { return joinChars(chars); }
+string "texto"= "\"" chars:[^\"]* "\"" {
+    const loc = location()?.start;
+    let idRoot = cst.newNode();
+    newPath(idRoot, 'string', [chars.join('')]);
+    return new Primitivo(loc?.line, loc?.column, idRoot,'string', Type.ASCIZ, chars.join(''));
+}
 
 entero "entero"= _ "#"? s:"-"? i:[0-9]+ {
     let n ="";
@@ -2437,11 +2453,25 @@ entero "entero"= _ "#"? s:"-"? i:[0-9]+ {
     i.forEach(e => {
       n+=""+e;
     });
-    return n;
+    const loc = location()?.start;
+    let idRoot = cst.newNode();
+    newPath(idRoot, 'integer', [text()]);
+    return new Primitivo(loc?.line, loc?.column, idRoot,'integer', Type.WORD, parseInt(n, 10));
   }
 
-decimal "decimal"= _ "#" "0x" i:[0-9A-Fa-f]+
-         / _ ("0x"i/"0b") i:[0-9A-Fa-f]+
+decimal "decimal"= _ "#"? s:("0x"i/"0b"i)i:[0-9A-Fa-f]+{
+    let n =s;
+    if(s=='-'){
+      n+="-";
+    }
+    i.forEach(e => {
+      n+=""+e;
+    });
+    const loc = location()?.start;
+    let idRoot = cst.newNode();
+    newPath(idRoot, 'decimal', [text()]);
+    return new Primitivo(loc?.line, loc?.column, idRoot,'decimal', Type.SPACE, n);
+}
 
 flotante "flotante"= _ "#"? s:"-"? i:([0-9]+) "." d:([0-9]+) { 
   let n ="";

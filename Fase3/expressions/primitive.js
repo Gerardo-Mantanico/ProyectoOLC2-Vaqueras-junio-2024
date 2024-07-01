@@ -1,4 +1,4 @@
-class Primitive extends Expression {
+class Primitivo extends Expression {
 
     constructor(line, col, id, name, type, value) {
         super();

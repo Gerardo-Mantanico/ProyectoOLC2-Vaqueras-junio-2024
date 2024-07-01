@@ -1,7 +1,7 @@
 class Registers{
     constructor(){
         this.registers= new Array(32).fill(0);
-        this.reg32Bits=new Array(32).fill("0x0000");
+        this.reg32Bits=new Array(32).fill(0);
     }
 
     getRegister(registerIndex){
