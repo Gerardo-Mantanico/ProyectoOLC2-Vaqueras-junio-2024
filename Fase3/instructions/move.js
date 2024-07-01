@@ -11,16 +11,21 @@ class Move extends Instruction {
 
     execute(ast, env, gen) {
         gen.addQuadruple("MOV", this.value?.value, null, null, this.obj);
-
-        let newValue
-        // Validar tipo de valor
-        if(this.value instanceof Expression) newValue = this.value?.execute(ast, env, gen);
-        else newValue = ast.registers?.getRegister(this.value);
-        // Validaciones
-        if (newValue === null) ast.setNewError({ msg: `El valor de asignación es incorrecto.`, line: this.line, col: this.col});
-        // Set register
-        let setReg = ast.registers?.setRegister(this.obj, newValue);
-        if(setReg===null)setReg = ast.registers?.setRegister32(this.obj, newValue);
-        if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
+        if(this.obj.toLowerCase().includes("w") && this.value.length===1){//es un caracter
+            let setReg = ast.registers?.setRegister32(this.obj, this.value.charCodeAt(0));
+            if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
+        }else{
+            let newValue
+            // Validar tipo de valor
+            if(this.value instanceof Expression) newValue = this.value?.execute(ast, env, gen);
+            else newValue = ast.registers?.getRegister(this.value);
+            // Validaciones
+            if (newValue === null) ast.setNewError({ msg: `El valor de asignación es incorrecto.`, line: this.line, col: this.col});
+            // Set register
+            let setReg = ast.registers?.setRegister(this.obj, newValue);
+            if(setReg===null)setReg = ast.registers?.setRegister32(this.obj, newValue);
+            if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
+        
+        }
     }
 }

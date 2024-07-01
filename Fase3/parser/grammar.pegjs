@@ -616,7 +616,7 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSET', rs1, 'COMA', rs2]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSET', rs1, rs2, null, null,null);
+      return new Cset(loc?.line, loc?.column, idRoot, rs1, rs2);
   }
   / _ op:"CSETM "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
@@ -660,7 +660,7 @@ instrucciones
        const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Conditional Instructions', ['CSEL', rs1, 'COMA', rs2, 'COMA', rs3,'COMA',rs4]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Conditional Instructions', 'CSEL', rs1, rs2, rs3, rs4,null);
+      return new Csel(loc?.line, loc?.column, idRoot,rs1, rs2, rs3, rs4);
   }
   / _ op:"CSINC "i _ rs1:(rpg/nums/ID) coma _ rs2:(rpg/nums/ID) coma _ rs3:(rpg/nums/ID) coma _ rs4:(rpg/nums/ID) _ fin{
       const loc = location()?.start;
@@ -769,11 +769,11 @@ instrucciones
   }
 
   // Comparador
-  / _ op: "CMP "i _ rd:rpg coma _ rs1:(nums/rpg) _ fin{
+  / _ op: "CMP "i _ rd:(rpg/nums) coma _ rs1:(nums/rpg) _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Comparador', ['CMP',rd,'COMA',rs1]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Comparador', 'CMP', rd, rs1, null, null,null);
+      return new Cmp(loc?.line, loc?.column, idRoot, rd, rs1);
   }
   / _ op: "CMN "i _ rd:rpg coma _ rs1:(nums/rpg) _ fin{
       const loc = location()?.start;

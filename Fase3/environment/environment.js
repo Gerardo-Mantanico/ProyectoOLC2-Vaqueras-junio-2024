@@ -4,6 +4,10 @@ class Environment {
         this.previous = previous;
         this.id = id;
         this.table = {};
+        this.Z=0;//si el resultado es cero=1 / 0
+        this.N=0;//si es resultado es negativo=1 / 0
+        this.V=0;
+        this.C=0;
     }
 
     saveVariable(ast, line, col, id, symbol) {
