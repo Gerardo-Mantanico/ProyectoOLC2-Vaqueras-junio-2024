@@ -6,21 +6,39 @@ class Ast {
         this.cstNodes = [];
         this.cstEdges = [];
         this.idCount = 0;
+        this.registers = new Registers()
     }
 
-    addNode(label){
+
+    addNode(label) {
         this.cstNodes.push({
-            id: this.idCount, 
+            id: this.idCount,
             label: label,
         });
         this.idCount = this.idCount + 1;
     }
 
-    addEdge(from, to){
+    addEdge(from, to) {
         this.cstEdges.push({
-            from: from, 
+            from: from,
             to: to,
         });
+    }
+
+    setNewError(err) {
+        this.errors.push(err);
+    }
+
+    getErrors(){
+        return this.errors;
+    }
+
+    getConsole() {
+        return this.console;
+    }
+
+    setConsole(str) {
+        this.console += str;
     }
 
 }

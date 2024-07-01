@@ -28,6 +28,14 @@
       cst.addEdge(idRoot, newNode);
     }
   }
+    function reportError(location, expected) {
+    return {
+      found:expected,
+      type: "error",
+      message: `In the token ${expected}< at line ${location.start.line}, column ${location.start.column}`,
+      location: location
+    };
+  }
 }
 
 
@@ -87,7 +95,8 @@ directivas
     addInstructions(ins);
     return new TextSection(idRoot, 'TextSection', id, ins);
   }// Fin de línea para directivas sin más especificación
-  /instrucciones 
+  /instrucciones
+  /ErrorRecovery
 
 instrucciones
   // REGISTROS

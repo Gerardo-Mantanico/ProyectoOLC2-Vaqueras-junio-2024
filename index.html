@@ -59,6 +59,8 @@
                 <li class="tab"><a href="#error__table">Error Table </a></li>
                 <li class="tab"><a href="#quad__table">Quadruples </a></li>
                 <li><a class="tab"   href="#mynetwork">cst </a></li>
+                <li class="tab"><a href="#registers"> Registers </a></li>
+                <li class="tab"><a href="#registers32"> Registers32Bits </a></li>
             </ul>
         </div>
 
@@ -87,7 +89,7 @@
                     <ul id="nav-mobile" class="nav__options">
                         <li>
                             <button class="btn-floating waves-effect waves-circle   tooltipped" data-position="bottom"
-                                data-tooltip="Analysis" id="btn__analysis">
+                                data-tooltip="Run" id="btn__analysis">
                                 <i class="material-icons"> play_arrow</i>
                             </button>
                         </li>
@@ -96,6 +98,12 @@
                             <button class="btn-floating waves-effect waves-circle   tooltipped" data-position="bottom"
                                 data-tooltip="Clear Editor" id="btn__clean">
                                 <i class="material-icons"> cleaning_services </i>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="btn-floating waves-effect waves-circle  tooltipped" data-position="bottom"
+                                data-tooltip="next" id="btn__next">
+                                <i class="material-icons">arrow_forward</i>
                             </button>
                         </li>
                     </ul>
@@ -151,6 +159,28 @@
                     </tfoot>
                 </table>
             </div>
+            <div id="registers" class="col s12 tab__panel">
+                <table id="regTable" style="width: 100%">
+                      <thead>
+                        <tr>
+                            <th>Register</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="registers32" class="col s12 tab__panel">
+                <table id="regTable32" style="width: 100%">
+                      <thead>
+                        <tr>
+                            <th>Register</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="tab__panel__btn">
@@ -175,6 +205,16 @@
     <script src="Fase3/expressions/operation.js"></script>
     <!-- ============================= EXPRESSIONS ============================== -->
     <script src="Fase3/instructions/systemCall.js"></script>
+    <script src="Fase3/environment/registers.js"></script>
+    <script src="Fase3/environment/type.js"></script>
+    <script src="Fase3/environment/symbol.js"></script>
+    <script src="Fase3/expressions/primitive.js"></script>
+    <script src="Fase3/instructions/declaration.js"></script>
+    <script src="Fase3/instructions/move.js"></script>
+    <script src="Fase3/instructions/ldr.js"></script>
+    <script src="Fase3/instructions/numOperation.js"></script>
+    <script src="Fase3/instructions/ldrb.js"></script>
+    <script src="Fase3/errors/errors.js"></script>
 
 </body>
 </html>

@@ -3,49 +3,48 @@ class Environment {
     constructor(previous, id) {
         this.previous = previous;
         this.id = id;
-        this.tabla = {};
+        this.table = {};
     }
 
-    saveVariable(ast,line,col,id,Symbol){
-        if(id in this.tabla){
-            ast.setNewError({msg: `La variable ${id} ya existe`,line,col});
+    saveVariable(ast, line, col, id, symbol) {
+        if (id in this.table) {
+            ast.setNewError({ msg: `La variable ${id} ya existe.`, line, col});
             return;
         }
-        this.tabla[id]=Symbol;
+        this.table[id] = symbol;
     }
 
-    getVariable(ast, line,col,id){
-        let tmpEnv =this;
-        while(true){
-            if(id in tmpEnv.tabla){
-                return tmpEnv.tabla[id];
+    getVariable(ast, line, col, id) {
+        let tmpEnv = this;
+        while (true) {
+            if (id in tmpEnv.table) {
+                return tmpEnv.table[id];
             }
-            if(tmpEnv.previous===null){
+            if (tmpEnv.previous === null) {
                 break;
-            }
-            else{
-                tmpEnv=tmpEnv.previous;
+            } else {
+                tmpEnv = tmpEnv.previous;
             }
         }
-        ast?.setNewError({msg: `La variable ${id} no existe`,line,col });
-        return new Symbol(0,0, '',Type.NULL,null);
+        ast?.setNewError({ msg: `La variable ${id} no existe.`, line, col});
+        return new Symbolo(0, 0, '', Type.NULL, null);
     }
 
     setVariable(ast, line, col, id, sym) {
         let tmpEnv = this;
         while (true) {
-            if (id in tmpEnv.tabla) {
-                tmpEnv.tabla[id] = sym;
+            if (id in tmpEnv.table) {
+                tmpEnv.table[id] = sym;
                 return sym;
             }
             if (tmpEnv.previous === null) {
                 break;
-            }
-            else {
+            } else {
                 tmpEnv = tmpEnv.previous;
             }
         }
-        ast?.setNewError ({ msj: `La variable ${id} no existe`,line,col});
-        return new Symbol(0,0,'',Type.NULL,null)
+        ast?.setNewError({ msg: `La variable ${id} no existe.`, line, col});
+        return new Symbolo(0, 0, '', Type.NULL, null);
     }
+
 }

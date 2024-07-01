@@ -35,9 +35,7 @@ export const clearQuadTable = () => {
 }
 
 export const addDataToQuadTable = (data) => {
-    console.log(data);
     for (let quad of data) {
-        console.log(quad.getQuadruple());
         quadTable.row.add(quad?.getQuadruple()).draw();
     }
 }
