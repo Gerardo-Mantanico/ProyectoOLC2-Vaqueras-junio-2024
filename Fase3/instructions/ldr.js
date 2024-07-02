@@ -9,7 +9,7 @@ class Ldr extends Instruction {
         this.variable = variable;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         // Obteniendo valor
         let newValue = env?.getVariable(ast, this.line, this.col, this.variable);
         // Validando retorno
@@ -18,5 +18,6 @@ class Ldr extends Instruction {
         newValue.id = this.variable;
         let setReg = ast.registers?.setRegister(this.reg, newValue);
         if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
+        return index;
     }
 }

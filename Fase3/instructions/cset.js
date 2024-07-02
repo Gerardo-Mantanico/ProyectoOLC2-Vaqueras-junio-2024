@@ -7,7 +7,7 @@ class Cset extends Instruction{
         this.op1=reg;
         this.et=et;
     }
-    execute(ast, env, gen){
+    execute(ast, env, gen, index, inst){
         let tag = this.et;
         if(tag==="eq"){//si los valores son iguales
             if(env.Z===1) this.setValue(ast,env,gen,this.op1,1,this.linea,this.columna);
@@ -32,6 +32,7 @@ class Cset extends Instruction{
         else{
             ast.setNewError({ msg: `La etiqueta ${tag} No es valida.`, line: this.linea, col: this.columna});
         }
+        return index;
     }
     setValue(ast,env,gen,reg,value, linea, columna){
         let setReg = ast.registers?.setRegister32(reg, value);

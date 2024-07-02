@@ -98,10 +98,13 @@ directivas
   }
   / _ id:ID dospuntos _ fin ins:instrucciones* // IDs con dos puntos
   {
+    const loc = location()?.start;
     let idInst = cst.newNode();
     newPath(idInst, id+":", ins);
     let idRoot = cst.newNode();
     newPath(idRoot,"Inicio Etiqueta", [{ id:idInst }]);
+    let et=new Etiqueta(loc?.line,loc?.column,id);
+    instructions.push(et);
     addInstructions(ins);
     return new TextSection(idRoot, 'TextSection', id, ins);
   }// Fin de línea para directivas sin más especificación
@@ -787,56 +790,56 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BEQ',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BEQ', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"BNE "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BNE',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BNE', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"BGT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BGT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BGT', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"BLT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['BLT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'BLT', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"B.EQ "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.EQ',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.EQ', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"B.GT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.GT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.GT', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"B.LT "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.LT',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.LT', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
     / _ op:"B.NE "i _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', ['B.NE',rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', 'B.NE', rd, null, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
     }
     
   //Mas

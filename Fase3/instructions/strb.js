@@ -10,7 +10,7 @@ class Strb extends Instruction {
         this.numDesp=numDesp;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         let ndesp=0;
         if(this.numDesp!=null){
             let val = this.obtenerValor(ast,env,gen,this.numDesp);
@@ -36,7 +36,7 @@ class Strb extends Instruction {
         
         }
 
-        
+        return index;
     }
     obtenerValor(ast, env, gen, op) {
         if (op instanceof Expression) {

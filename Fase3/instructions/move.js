@@ -9,7 +9,7 @@ class Move extends Instruction {
         this.value = value;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         gen.addQuadruple("MOV", this.value?.value, null, null, this.obj);
         if(this.obj.toLowerCase().includes("w") && this.value.length===1){//es un caracter
             let setReg = ast.registers?.setRegister32(this.obj, this.value.charCodeAt(0));
@@ -27,5 +27,7 @@ class Move extends Instruction {
             if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
         
         }
+        console.log("ejecutando instrucciones en el indice: "+ index);
+        return index;
     }
 }

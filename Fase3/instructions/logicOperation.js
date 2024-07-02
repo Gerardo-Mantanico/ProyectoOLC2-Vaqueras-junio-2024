@@ -10,7 +10,7 @@ class LogicOperation extends Instruction{
         this.r3=r3;
     }
 
-    execute(ast, env, gen){
+    execute(ast, env, gen, index, inst){
         let obj=this.obtenerValor(ast,env,gen,this.r2);
         let num1 = obj?.value?? obj;
 
@@ -28,6 +28,7 @@ class LogicOperation extends Instruction{
             if (setReg === null) setReg = ast.registers?.setRegister32(this.r1, value);
             if (setReg === null) ast.setNewError({ msg: `El registro de destino ${this.r1} es incorrecto.`, line: this.linea, col: this.columna });
         }
+        return index;
 
     }
 

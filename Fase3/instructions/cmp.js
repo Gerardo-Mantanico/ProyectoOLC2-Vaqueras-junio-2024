@@ -8,7 +8,7 @@ class Cmp extends Instruction{
         this.reg2=reg2;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         let obj = this.obtenerValor(ast,env,gen,this.reg1);
         let obj1 = this.obtenerValor(ast,env,gen,this.reg2);
 
@@ -20,6 +20,7 @@ class Cmp extends Instruction{
         env.N=(cmp < 0) ? 1 : 0;
         env.C=0;
         env.V=0;
+        return index;
     }
     obtenerValor(ast, env, gen, op) {
         if (op instanceof Expression) {

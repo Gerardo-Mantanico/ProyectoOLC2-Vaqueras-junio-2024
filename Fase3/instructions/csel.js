@@ -10,7 +10,7 @@ class Csel extends Instruction{
         this.et=et;
 
     }
-    execute(ast, env, gen){
+    execute(ast, env, gen, index, inst){
         let obj = this.obtenerValor(ast,env,gen,this.op2);//si se cumple
         let obj1 = this.obtenerValor(ast,env,gen,this.op3);//sino se cumple
 
@@ -40,6 +40,7 @@ class Csel extends Instruction{
         else{
             ast.setNewError({ msg: `La etiqueta ${tag} No es valida.`, line: this.linea, col: this.columna});
         }
+        return index;
     }
     setValue(ast,env,gen,reg,value, linea, columna){
         let setReg = ast.registers?.setRegister32(reg, value);

@@ -10,7 +10,7 @@ class Ldrb extends Instruction {
         this.numDesp=numDesp;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         // Obteniendo valor
         /*let newValue = env?.getVariable(ast, this.line, this.col, this.variable);
         // Validando retorno
@@ -34,5 +34,6 @@ class Ldrb extends Instruction {
             }
      
        }
+       return index;
     }
 }

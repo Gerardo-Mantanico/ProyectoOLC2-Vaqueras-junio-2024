@@ -10,7 +10,7 @@ class numOperation extends Instruction {
         this.op3 = op3;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         console.log(this.operador + ", " + this.op1 + ", " + this.op2 + ", " + this.op3);
 
         let val1 = this.obtenerValor(ast, env, gen, this.op2);
@@ -30,6 +30,7 @@ class numOperation extends Instruction {
                 if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.linea, col: this.columna });
             }
         }
+        return index;
     }
 
     obtenerValor(ast, env, gen, op) {

@@ -10,7 +10,7 @@ class Declaration extends Instruction {
         this.exp = exp;
     }
 
-    execute(ast, env, gen) {
+    execute(ast, env, gen, index, inst) {
         gen.addQuadruple(this.type, this.exp.getValue(), null, null, this.name);
         // Obtener valor
         let sym = this.exp.execute(ast, env, gen);
@@ -27,6 +27,7 @@ class Declaration extends Instruction {
         }
         // Guardar en entorno
         env.saveVariable(ast, this.line, this.col, this.name, sym);
+        return index;
     }
 
     consideraciones(sym){

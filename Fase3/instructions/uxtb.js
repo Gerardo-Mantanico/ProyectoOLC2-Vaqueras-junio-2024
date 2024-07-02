@@ -9,7 +9,7 @@ class Uxtb extends Instruction{
         this.op3=op3;
     }
 
-    async execute(ast, env, gen){
+    async execute(ast, env, gen, index, inst){
         gen.addQuadruple("UXTB", this.op2, this.op3, null, this.op1);
         if(this.op3===null){//uxtb w1, x0
 
@@ -26,5 +26,6 @@ class Uxtb extends Instruction{
             if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
         
         }
+        return index;
     }
 }

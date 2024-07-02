@@ -11,7 +11,7 @@ class opDesplazamiento extends Instruction {
         this.op3=op3;
     }
 
-    execute(ast, env, gen){
+    execute(ast, env, gen, index, inst){
         let obj=this.obtenerValor(ast,env,gen,this.op2);
         let bin=obj?.value?? obj;
         obj=this.obtenerValor(ast,env,gen,this.op3);
@@ -37,7 +37,7 @@ class opDesplazamiento extends Instruction {
         }
         let setReg = ast.registers?.setRegister32(this.op1, newValue);
         if (setReg === null) ast.setNewError({ msg: `El registro de destino ${this.r1} es incorrecto.`, line: this.linea, col: this.columna });
-        
+        return index;
     }
     ror(num, bits){
         const totalBits = 64; // Trabajamos con enteros de 32 bits
