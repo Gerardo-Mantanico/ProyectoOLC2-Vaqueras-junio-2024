@@ -7,7 +7,7 @@ class Etiqueta extends Instruction{
     }
 
     execute(ast, env, gen, index, inst) {
-        //console.log("Iniciando etiqueta: " + this.name);
+        console.log("Iniciando etiqueta: " + this.id);
         return index;
     }
 }

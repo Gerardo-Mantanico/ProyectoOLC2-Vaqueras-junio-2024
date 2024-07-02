@@ -8,9 +8,25 @@ class saltoCondicional extends Instruction{
         this.et=et;
     }
     execute(ast, env, gen, index, inst) {
+        console.log("ejecutando comparacion: " +this.salto)
         let indice=-1;
         if(this.salto==="blt"||this.salto==="b.lt"){
             if(env.Z===0 && env.N===1) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
+        }
+        else if(this.salto==="beq"||this.salto==="b.eq"){
+            if(env.Z===1) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
+        }
+        else if(this.salto==="bne"||this.salto==="b.ne"){
+            if(env.Z===0) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
+        }
+        else if(this.salto==="bgt"||this.salto==="b.gt"){
+            if(env.Z===0 && env.N===0) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
+        }
+        else if(this.salto==="bge"||this.salto==="b.ge"){
+            if(env.Z===1||env.N=== env.V) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
+        }
+        else if(this.salto==="ble"||this.salto==="b.le"){
+            if((env.Z===1)||env.N !== env.V) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
         }
         if(indice===-1)return index;
         return indice;

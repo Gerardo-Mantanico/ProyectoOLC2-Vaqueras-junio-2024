@@ -63,7 +63,7 @@ class numOperation extends Instruction {
         switch (operador) {
             case "add":
                 return val1 + val2;
-            case "sub":
+            case "sub":                
                 return val1 - val2;
             case "mul":
                 return val1 * val2;

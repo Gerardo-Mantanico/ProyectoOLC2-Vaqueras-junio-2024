@@ -33,6 +33,7 @@ const analysis = async (codigo, consoleResult) => {
         llegarTablaRegistros(ast.registers.getAllRegisters(), ast.registers.getAllRegisters32Bits());
         if (ast.getErrors()?.length === 0) {
             console.log(env)
+            console.log(ast)
             consoleResult.setValue("codigo correctamente compilado!!!\n"+ast.getConsole());
             msj.textContent = "successfully. Time: " + (end - start) + " ms";
             msj.style.backgroundColor = "#a6ffa6";

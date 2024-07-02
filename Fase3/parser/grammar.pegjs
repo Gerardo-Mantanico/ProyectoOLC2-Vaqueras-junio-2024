@@ -256,7 +256,7 @@ instrucciones
     const loc = location()?.start;
     const idRoot = cst.newNode();
     newPath(idRoot, 'Branch Instructions', ['B', id]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Branch Instructions', 'B', id, null, null, null);
+    return new saltoIncondicional(loc?.line, loc?.column, idRoot,op, id);
   }
   / _ op:("RET"i/"ERET"i) _ fin // Retorna de una función
   {
@@ -901,19 +901,19 @@ instrucciones
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
   }
   / _ op: ("BGE "i/"B.GE "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
   }
   / _ op: ("BLE "i/"B.LE "i) _ rd:ID _ fin{
       const loc = location()?.start;
       const idRoot = cst.newNode();
       newPath(idRoot, 'Operadores relacionales', [op,rd]);
-      return new Operation(loc?.line, loc?.column, idRoot, 'Operadores relacionales', op, rd, null,null,null);
+      return new saltoCondicional(loc?.line, loc?.column, idRoot,op, rd);
   }
   / _ op: ("BAL "i/"B.AL "i) _ rd:ID _ fin{
       const loc = location()?.start;
@@ -1307,7 +1307,7 @@ instrucciones
     const loc = location()?.start;
     let idRoot = cst.newNode();
     newPath(idRoot, 'Logic', ['ands', rd, 'COMA', op1, 'COMA', op2]);
-    return new Operation(loc?.line, loc?.column, idRoot, 'Logic', 'ands', rd, op1, op2, null);
+    return new LogicOperation(loc?.line, loc?.column, idRoot, op, rd, op1, op2);
   }
 
   / _ op: "ORR "i _ rd:rpg coma _ op1:(rpg/nums) coma _ op2:(rpg/nums) _ fin{

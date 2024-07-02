@@ -17,12 +17,12 @@ class LogicOperation extends Instruction{
         obj=this.obtenerValor(ast,env,gen,this.r3);
         let num2 = obj?.value?? obj;
 
-        let bin1 = this.binario(num1,this.linea,this.columna);
-        let bin2 = this.binario(num2,this.linea,this.columna);
-        
-        let bms1=parseInt(bin1[bin1.length-1]);
-        let bms2=parseInt(bin2[bin2.length-1]);
-        let value=this.operacionLogica(this.operacion,bms1,bms2);
+        let bin1 = this.binario(num1,this.linea,this.columna,8);
+        let bin2 = this.binario(num2,this.linea,this.columna,8);
+
+        let bms1=parseInt(bin1.substring(2),2);
+        let bms2=parseInt(bin2.substring(2),2);
+        let value=this.operacionLogica(env,this.operacion,bms1,bms2);
         if (value !== null) {
             let setReg = ast.registers?.setRegister(this.r1, value);
             if (setReg === null) setReg = ast.registers?.setRegister32(this.r1, value);
@@ -32,23 +32,32 @@ class LogicOperation extends Instruction{
 
     }
 
-    operacionLogica(operacion, bms1, bms2) {
-        console.log(bms1 + "comparando bit " + bms2)
+    operacionLogica(env,operacion, bms1, bms2) {
         operacion = operacion.trim().toLowerCase();
         if (operacion === "and") {
-            return bms1 && bms2 ? 1 : 0;
+            return bms1 & bms2
+        }
+        else if (operacion === "ands") {
+            let result = bms1 & bms2;
+            let resBin = result.toString(2);
+            let msb = (result >> (resBin.length - 1)) & 1;//bit mas significativo
+            env.Z = result===0? 1:0;
+            env.N = msb===1? 1 :0;
+            env.C=0;
+            env.V=0;
+           return result;
         }
         return null;  // En caso de que la operación no sea reconocida
     }
     
 
-    binario(num, line, col){
+    binario(num, line, col, width){
 
         if (typeof num !== 'number' || !Number.isInteger(num)) {
             ast?.setNewError({ msg: `El texto ${num} no puede onvertirse a Binario.`, line, col});
             return null;
         }
-        return num.toString(2);
+        return '0b'+num.toString(2).padStart(width, '0');
     }
 
     obtenerValor(ast, env, gen, op) {

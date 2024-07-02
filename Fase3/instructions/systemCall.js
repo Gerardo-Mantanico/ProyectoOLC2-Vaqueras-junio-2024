@@ -51,7 +51,7 @@ class SystemCall extends Instruction {
         return ind;
     }
 
-    async stdout(ast, env, gen, index){ // Salida estándar 
+     stdout(ast, env, gen, index){ // Salida estándar 
         let regtemp8 = ast?.registers?.getRegister('x8');
         // Validar número de llamada al sistema
         if(regtemp8.value === 64){ // write
@@ -81,7 +81,7 @@ class SystemCall extends Instruction {
         return index;
     }
 
-    async stderr(ast, env, gen, index){ // Salida de errores estándar
+     stderr(ast, env, gen, index){ // Salida de errores estándar
         // ToDo:
         return index;
     }
