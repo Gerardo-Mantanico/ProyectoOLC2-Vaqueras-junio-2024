@@ -8,7 +8,7 @@ let quadTable;
 $(document).ready(function () {
 
     quadTable = newDataTable('#quadTable',
-        [{data: "Op"}, {data: "Arg1"}, {data: "Arg2"}, {data: "Arg3"}, {data: "Arg4"},{data: "Result"}],
+        [{data: "Op"}, {data: "Arg1"}, {data: "Arg2"}, {data: "Arg3"},{data: "Result"}, {data: "Arg4"}],
         []);
 
     $('.tabs').tabs();
