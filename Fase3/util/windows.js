@@ -192,15 +192,6 @@ export function highlightLine(lineNumber) {
     }
 }
 
-
-
-/*export function highlightLine(lineNumber) {
-    var lineHandle = editor.getLineHandle(lineNumber - 1);
-    if (lineHandle) {
-      editor.addLineClass(lineHandle, 'background', 'highlighted-line');
-    }
-  }*/
-
 export default {
     addEditorWindow,
     consoleWindow,

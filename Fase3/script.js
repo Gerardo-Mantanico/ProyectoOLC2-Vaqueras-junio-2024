@@ -52,6 +52,7 @@ function analysis(codigo, consoleResult) {
         if (isLexicalError(e)) {
             table("Se ha encontrado un caracter que no pertenece al lenguaje: " + e.found, e.location.start.line, e.location.start.column, "Lexico");
         } else {
+            console.log("capturando el error "+e);
              table(e.message, e.location.start.line, e.location.start.column, "Sintátctico");
         }
         document.getElementById('mynetwork').innerHTML = "";
@@ -136,5 +137,6 @@ function clearast(){
     ast1 = new Ast();                           
     env1 = new Environment(null, 'Global');     
     gen1 = new Generator();
+    contLinea=0;
 
 }
