@@ -8,6 +8,11 @@ class Environment {
         this.N=0;//si es resultado es negativo=1 / 0
         this.V=0;
         this.C=0;
+
+        this.O_WRONLY=0;//bandera de escritura de textos
+        this.O_CREATE=0//bandera de escritura de textos
+        this.O_RDONLY=0//bandera de lextura de achivos de txto
+        this.content="";
     }
 
     saveVariable(ast, line, col, id, symbol) {

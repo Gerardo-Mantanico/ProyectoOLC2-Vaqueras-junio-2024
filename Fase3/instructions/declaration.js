@@ -35,7 +35,9 @@ class Declaration extends Instruction {
     }
 
     consideraciones(sym){
-        if((this.type==".ascii"&&sym.type==".asciz")||(this.type==".space"&&sym.type==".word")){
+        if((this.type==".ascii"&&sym.type==".asciz")||
+        (this.type==".space"&&sym.type==".word")||
+        (this.type==".skip"&&sym.type==".word")){
             sym.type=this.type;
             return true;
         }

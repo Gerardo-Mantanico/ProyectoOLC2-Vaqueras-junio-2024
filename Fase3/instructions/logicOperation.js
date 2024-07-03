@@ -40,6 +40,12 @@ class LogicOperation extends Instruction{
         operacion = operacion.trim().toLowerCase();
         if (operacion === "and") {
             return bms1 & bms2
+        } else if (operacion === "orr") {
+            return bms1 | bms2;
+        } else if (operacion === "eor") {
+            return bms1 ^ bms2;
+        } else if (operacion === "bic") {
+            return bms1 & ~bms2;
         }
         else if (operacion === "ands") {
             let result = bms1 & bms2;
