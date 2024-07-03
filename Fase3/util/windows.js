@@ -2,7 +2,8 @@ const editorContainer = document.getElementById("editorContainer");
 const ConsoleResul = document.getElementById("ConsoleResul");
 const windowList = document.getElementById("windowList");
 let editors = [], codigo = [], result, currentEditorIndex = -1;
-let indice = 0;
+let indice = 0, editor;
+
 
 // Función para agregar una nueva ventana de edición
 function addEditorWindow() {
@@ -11,7 +12,7 @@ function addEditorWindow() {
     newEditor.style.height = "72vh";
     editorContainer.appendChild(newEditor);
     // Inicializa CodeMirror en la nueva ventana
-    var editor = CodeMirror(newEditor, {
+        editor = CodeMirror(newEditor, {
         lineNumbers: true,
         lineNumbers: true,
         styleActivateLine: true,
@@ -19,6 +20,7 @@ function addEditorWindow() {
         theme: "moxer",
         mode: "text/x-rustsrc",
         scrollbarStyle: "null",
+        atomic: true,
     });
 
 
@@ -172,6 +174,33 @@ function setIndice(value) {
 function getConsoleResult(){
     return result;
 }
+
+
+let lineaResaltada = null; // Variable global para almacenar la línea resaltada actualmente
+
+export function highlightLine(lineNumber) {
+    // Eliminar el resaltado de la línea anterior, si existe
+    if (lineaResaltada !== null) {
+        editor.removeLineClass(lineaResaltada, 'background', 'highlighted-line');
+    }
+
+    // Resaltar la nueva línea
+    var lineHandle = editor.getLineHandle(lineNumber - 1);
+    if (lineHandle) {
+        editor.addLineClass(lineHandle, 'background', 'highlighted-line');
+        lineaResaltada = lineHandle; // Actualizar la variable de línea resaltada
+    }
+}
+
+
+
+/*export function highlightLine(lineNumber) {
+    var lineHandle = editor.getLineHandle(lineNumber - 1);
+    if (lineHandle) {
+      editor.addLineClass(lineHandle, 'background', 'highlighted-line');
+    }
+  }*/
+
 export default {
     addEditorWindow,
     consoleWindow,
@@ -179,6 +208,10 @@ export default {
     codigo,
     editors,
     getCodigoIndice,
-    getConsoleResult
+    getConsoleResult,
+    highlightLine
 }
+
+
+
 

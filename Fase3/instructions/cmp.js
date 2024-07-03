@@ -9,6 +9,7 @@ class Cmp extends Instruction{
     }
 
     execute(ast, env, gen, index, inst) {
+        console.log("linea "+this.linea);
         let obj = this.obtenerValor(ast,env,gen,this.reg1);
         let obj1 = this.obtenerValor(ast,env,gen,this.reg2);
 
@@ -20,7 +21,11 @@ class Cmp extends Instruction{
         env.N=(cmp < 0) ? 1 : 0;
         env.C=0;
         env.V=0;
-        return index;
+        return{
+            Index:index,
+            line: this.linea
+        } 
+        
     }
     obtenerValor(ast, env, gen, op) {
         if (op instanceof Expression) {

@@ -37,7 +37,11 @@ class opDesplazamiento extends Instruction {
         }
         let setReg = ast.registers?.setRegister32(this.op1, newValue);
         if (setReg === null) ast.setNewError({ msg: `El registro de destino ${this.r1} es incorrecto.`, line: this.linea, col: this.columna });
-        return index;
+        return{
+            Index:index,
+            line: this.line
+        } 
+        
     }
     ror(num, bits){
         const totalBits = 64; // Trabajamos con enteros de 32 bits

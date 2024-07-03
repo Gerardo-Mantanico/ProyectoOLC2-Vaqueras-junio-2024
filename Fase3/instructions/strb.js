@@ -18,7 +18,7 @@ class Strb extends Instruction {
         }
         if(this.reg.toLowerCase().includes("w")){//strb w1, [x0]
                 let val = this.obtenerValor(ast,env,gen,this.reg);
-                console.log(val);
+              //  console.log(val);
                 let character = String.fromCharCode(val?.value?? val);
                 let sym =  ast.registers?.getRegister(this.variable);
                 sym.type=Type.ASCIZ;
@@ -36,7 +36,11 @@ class Strb extends Instruction {
         
         }
 
-        return index;
+        return{
+            Index:index,
+            line: this.line
+        } 
+        
     }
     obtenerValor(ast, env, gen, op) {
         if (op instanceof Expression) {

@@ -34,6 +34,10 @@ class Ldrb extends Instruction {
             }
      
        }
-       return index;
+       return{
+        Index:index,
+        line: this.line
+    } 
+    
     }
 }

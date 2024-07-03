@@ -27,7 +27,11 @@ class Move extends Instruction {
             if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
         
         }
-        console.log("ejecutando instrucciones en el indice: "+ index);
-        return index;
+        console.log("ejecutando instrucciones en el indice: "+ index+ "  linea: "+ this.line+ " "+this.obj);
+        return{
+            Index:index,
+            line: this.line
+        } 
+        
     }
 }

@@ -13,11 +13,20 @@ class Ldr extends Instruction {
         // Obteniendo valor
         let newValue = env?.getVariable(ast, this.line, this.col, this.variable);
         // Validando retorno
-        if (newValue.type === Type.NULL) return;
+
+        if (newValue.type === Type.NULL) {
+            return;
+        }
         // Set register
         newValue.id = this.variable;
         let setReg = ast.registers?.setRegister(this.reg, newValue);
         if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
-        return index;
+
+        return{
+            Index:index,
+            line: this.line
+        } 
+      
+        
     }
 }

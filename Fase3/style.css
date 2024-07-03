@@ -294,3 +294,7 @@ a.paginate_button.current{
     color: #ffffff !important;
     /* Color del texto del botón */
 }
+
+.highlighted-line {
+    background-color: var(--color-0) !important;
+  }

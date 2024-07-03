@@ -6,27 +6,29 @@ import { clearQuadTable, addDataToQuadTable } from "./table/QuadTable.js";
 import { isLexicalError } from "./lexical/lexical.js"
 import { table, tableBody } from "./table/tableError.js"
 import { llegarTablaRegistros, tablereg, tablereg32 } from "./table/tableRegister.js"
-let arregloDePalabras = "";
-let cont = 0, code = "";
+let contLinea = 0, type = 0;
 var msj = document.getElementById("msj");
-
-
+let ast1 = new Ast();                          // Creando ast auxiliar
+let env1 = new Environment(null, 'Global');    // Creando entorno global
+let gen1 = new Generator();                    // Creando generador
+let result;
 function analysis(codigo, consoleResult) {
     clearQuadTable();
     clearTable();
+    clearast();
     consoleResult.setValue("");
     try {
         let ast = new Ast();                          // Creando ast auxiliar
         let env = new Environment(null, 'Global');    // Creando entorno global
         let gen = new Generator();                    // Creando generador
         let start = performance.now();                // Obteniendo árbol
-        let result = PEGFASE1.parse(codigo);
+        result = PEGFASE1.parse(codigo);
         let end = performance.now();
-        //RootExecuter(result, ast, env, gen);        // Ejecutando instrucciones
         //ejecutar el data section
         DataSectionExecuter(result, ast, env, gen);
         //ejecutar las demas instrucciones
         RootExecuter(result, ast, env, gen);
+        // nextLine(result, ast, env, gen);
         // Generando gráfica
         generateCst(result.CstTree);
         // Generando cuádruplos
@@ -50,7 +52,7 @@ function analysis(codigo, consoleResult) {
         if (isLexicalError(e)) {
             table("Se ha encontrado un caracter que no pertenece al lenguaje: " + e.found, e.location.start.line, e.location.start.column, "Lexico");
         } else {
-            table(e.message, e.location.start.line, e.location.start.column, "Sintátctico");
+             table(e.message, e.location.start.line, e.location.start.column, "Sintátctico");
         }
         document.getElementById('mynetwork').innerHTML = "";
         consoleResult.setValue('Error encontrado:\n' + e);
@@ -58,22 +60,35 @@ function analysis(codigo, consoleResult) {
     }
 }
 
-function nextLine(codigo, consoleResult) {
-    if (cont === 0) {
-        const text = codigo.getValue();
-        arregloDePalabras = text.split("\n").filter(palabra => palabra.trim() !== '');
-        lineLocation(consoleResult, arregloDePalabras);
+function nextLine() {
+    console.log(" celestino hizo click en mi cola");
+    clearTable();
+    switch (type) {
+        case 0:
+            let state = DataSectionExecuterDegug(result, ast1, env1, gen1, contLinea);
+            if (state.state) {
+                windows.highlightLine(state.line);
+                contLinea++;
+            }
+            else {
+                type = 1;
+                contLinea = 0;
+            }
+            break;
+        case 1:
+            let line = RootExecuterDegug(result, ast1, env1, gen1, contLinea);
+            if (line === -1) {
+                type = 0;
+                contLinea = 0;
+                clearast();
+         }
+            else {
+                windows.highlightLine(line);
+                contLinea++;
+            }
+            break;
     }
-    else {
-        if (cont <= arregloDePalabras.length) {
-            lineLocation(consoleResult, arregloDePalabras);
-        }
-        else {
-            code = "";
-            cont = 0;
-        }
-    }
-
+    llegarTablaRegistros(ast1.registers.getAllRegisters(), ast1.registers.getAllRegisters32Bits());
 }
 
 function lineLocation(consoleResult, arregloDePalabras) {
@@ -116,4 +131,10 @@ function iterarErrores(errors) {
 function msjError() {
     msj.textContent = "Unsuccessfully.";
     msj.style.backgroundColor = "#ff8c8c";
+}
+function clearast(){
+    ast1 = new Ast();                           
+    env1 = new Environment(null, 'Global');     
+    gen1 = new Generator();
+
 }

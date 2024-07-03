@@ -32,7 +32,11 @@ class Cset extends Instruction{
         else{
             ast.setNewError({ msg: `La etiqueta ${tag} No es valida.`, line: this.linea, col: this.columna});
         }
-        return index;
+        return{
+            Index:index,
+            line: this.linea
+        } 
+        
     }
     setValue(ast,env,gen,reg,value, linea, columna){
         let setReg = ast.registers?.setRegister32(reg, value);

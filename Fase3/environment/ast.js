@@ -41,4 +41,5 @@ class Ast {
         this.console += str;
     }
 
+
 }

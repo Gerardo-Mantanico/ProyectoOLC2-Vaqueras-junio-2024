@@ -10,7 +10,12 @@ class saltoIncondicional extends Instruction{
     execute(ast, env, gen, index, inst) {
         let indice=-1;
         indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
-        if(indice===-1)return index;
+        if(indice===-1){
+            return{
+                Index:index,
+                line: this.linea
+            }     
+        }
         return indice;
     }
     existeEtiqueta(ast,inst,id, linea, columna){

@@ -11,7 +11,7 @@ class numOperation extends Instruction {
     }
 
     execute(ast, env, gen, index, inst) {
-        console.log(this.operador + ", " + this.op1 + ", " + this.op2 + ", " + this.op3);
+        console.log(this.operador + ", " + this.op1 + ", " + this.op2 + ", " + this.op3+ " linea "+this.linea);
 
         let val1 = this.obtenerValor(ast, env, gen, this.op2);
         let val2 = this.obtenerValor(ast, env, gen, this.op3);
@@ -19,7 +19,7 @@ class numOperation extends Instruction {
         if (val1 === null) ast.setNewError({ msg: `El valor de asignación para ${this.op2} es incorrecto.`, line: this.linea, col: this.columna });
         if (val2 === null) ast.setNewError({ msg: `El valor de asignación para ${this.op3} es incorrecto.`, line: this.linea, col: this.columna });
 
-        console.log(val1 + ", " + val2);
+       // console.log(val1 + ", " + val2);
 
         if (val1 != null && val2 != null) {
             let newValue = this.nuevoValor(this.operador, val1, val2, this.op2, this.op3, this.op1, ast);
@@ -30,7 +30,11 @@ class numOperation extends Instruction {
                 if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.linea, col: this.columna });
             }
         }
-        return index;
+        return{
+            Index:index,
+            line: this.linea
+        } 
+        
     }
 
     obtenerValor(ast, env, gen, op) {

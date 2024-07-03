@@ -28,7 +28,13 @@ class saltoCondicional extends Instruction{
         else if(this.salto==="ble"||this.salto==="b.le"){
             if((env.Z===1)||env.N !== env.V) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
         }
-        if(indice===-1)return index;
+        if(indice===-1){
+            return{
+                Index:index,
+                line: this.linea
+            } 
+            
+        }
         return indice;
     }
 

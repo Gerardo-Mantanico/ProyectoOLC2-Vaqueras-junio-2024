@@ -26,6 +26,9 @@ class Uxtb extends Instruction{
             if (setReg === null) ast.setNewError({ msg: `El registro de destino es incorrecto.`, line: this.line, col: this.col});
         
         }
-        return index;
+        return{
+            Index:index,
+            line: this.linea
+        } 
     }
 }

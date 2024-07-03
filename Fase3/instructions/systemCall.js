@@ -9,7 +9,7 @@ class SystemCall extends Instruction {
     }
 
     execute(ast, env, gen, index, inst) {
-        console.log("ejecutando la instruccion: "+index+" de "+inst?.length)
+        console.log("ejecutando la instruccion: "+index+" de "+inst?.length+" linea "+this.line)
         let indice=index;
         // Obteniendo parámetros de la llamada
         let regtemp0 = ast?.registers?.getRegister('x0');
@@ -19,7 +19,11 @@ class SystemCall extends Instruction {
         if(regtemp0.value === 1) indice=  this.stdout(ast, env, gen, indice);  // Se maneja una salida del sistema
         if(regtemp0.value === 2) indice= this.stderr(ast, env, gen, indice);  // Se maneja una salida del sistema
         if(indice<0) return -1;
-        return index;
+        return{
+            Index:index,
+            line: this.line
+        } 
+        
     }
 
      stdin(ast, env, gen, index){ // Entrada estándar

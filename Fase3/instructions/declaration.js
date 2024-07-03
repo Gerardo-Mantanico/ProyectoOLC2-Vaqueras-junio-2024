@@ -27,7 +27,11 @@ class Declaration extends Instruction {
         }
         // Guardar en entorno
         env.saveVariable(ast, this.line, this.col, this.name, sym);
-        return index;
+        return{
+            Index:index,
+            line: this.line
+        } 
+        
     }
 
     consideraciones(sym){
