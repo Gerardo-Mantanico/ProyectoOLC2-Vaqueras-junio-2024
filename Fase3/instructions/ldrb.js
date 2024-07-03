@@ -22,12 +22,13 @@ class Ldrb extends Instruction {
        if(this.numDesp===null){//lsrb w1, [x0]
             let valor;
             valor=ast.registers?.getRegister(this.variable);//si es un registro
-            console.log(valor);
+            console.log("obteniendo valor "+valor);
             let puntero = valor?.puntero;
             const strValue=valor?.value?? valor;
             if(strValue.length<=puntero){//si lo que contiene esta vacio
                 ast.setNewError({ msg: `El puntero del registrp ${this.variable} esta al limite.`, line: this.line, col: this.col});
             }else{
+                console.log("que trae aca "+strValue[puntero]);
                 let ascci = strValue[puntero].charCodeAt(0);
                 let setReg = ast.registers?.setRegister32(this.reg, ascci);
                 if (setReg === null) ast.setNewError({ msg: `El registro ${reg} de destino es incorrecto.`, line: this.line, col: this.col});

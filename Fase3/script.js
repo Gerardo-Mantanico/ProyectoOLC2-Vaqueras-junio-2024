@@ -36,8 +36,6 @@ function analysis(codigo, consoleResult) {
         // Agregando salida válida en consola
         llegarTablaRegistros(ast.registers.getAllRegisters(), ast.registers.getAllRegisters32Bits());
         if (ast.getErrors()?.length === 0) {
-            console.log(env)
-            console.log(ast)
             consoleResult.setValue("codigo correctamente compilado!!!\n" + ast.getConsole());
             msj.textContent = "successfully. Time: " + (end - start).toFixed(2); + " ms";
             msj.style.backgroundColor = "#a6ffa6";
@@ -62,7 +60,6 @@ function analysis(codigo, consoleResult) {
 }
 
 function nextLine() {
-    console.log(" celestino hizo click en mi cola");
     clearTable();
     switch (type) {
         case 0:

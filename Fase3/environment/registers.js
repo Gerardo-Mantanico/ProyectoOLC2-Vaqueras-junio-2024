@@ -8,16 +8,21 @@ class Registers{
         try {
             //realizar validaciones
             if(!/[xX]/.test(registerIndex)){
+                console.log(1);
                 return null;
+               
             }
             let regNumber = parseInt(registerIndex.replace(/[xX]/,''));
             //obtener el valor de un registro
             if(regNumber>=0 && regNumber<32){
                 return this.registers[regNumber];
             } else {
+                console.log(2);
                 return null;
+                
             }
         } catch (e) {
+            console.log(3);
             return null;
         }
 

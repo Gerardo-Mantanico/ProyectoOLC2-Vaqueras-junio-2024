@@ -18,6 +18,7 @@ class saltoCondicional extends Instruction{
         }
         else if(this.salto==="bne"||this.salto==="b.ne"){
             if(env.Z===0) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
+            console.log("etiqueta indice"+indice);
         }
         else if(this.salto==="bgt"||this.salto==="b.gt"){
             if(env.Z===0 && env.N===0) indice=this.existeEtiqueta(ast,inst,this.et,this.linea, this.columna);//existe la etiqueta   
@@ -35,7 +36,10 @@ class saltoCondicional extends Instruction{
             } 
             
         }
-        return indice;
+        return{
+            Index:indice,
+            line: this.linea
+        } 
     }
 
     existeEtiqueta(ast,inst,id, linea, columna){

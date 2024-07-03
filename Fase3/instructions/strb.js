@@ -21,7 +21,8 @@ class Strb extends Instruction {
               //  console.log(val);
                 let character = String.fromCharCode(val?.value?? val);
                 let sym =  ast.registers?.getRegister(this.variable);
-                sym.type=Type.ASCIZ;
+                 console.log("sym "+sym);
+                //sym.type=Type.ASCIZ;
                 let vs="";
                 for (let index = 0; index < sym.value.length; index++) {
                     if(index===ndesp){
